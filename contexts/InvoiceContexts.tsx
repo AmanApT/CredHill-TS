@@ -1,13 +1,27 @@
-'use client'; // Ensure it's a client component for state management
+"use client"; // Ensure it's a client component for state management
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  Dispatch,
+  SetStateAction,
+} from "react";
 
 export interface CompanyDetails {
   companyName: string;
   companyAddress: string;
-  gstin: string;
+  gst: string;
   email: string;
   phone: string;
+  clientId?: string;
+  pan?: string;
+  city?: string;
+  pincode?: string;
+  contact?: string;
+  logoUrl?: string;
+  stampUrl?: string;
 }
 
 export interface TableRow {
@@ -20,9 +34,9 @@ export interface TableRow {
   amount: number;
   cgst: number;
   sgst: number;
+  igst: number;
   total: number;
 }
-
 export interface InvoiceFormData {
   invoiceNo: string;
   venue: string;
@@ -31,59 +45,91 @@ export interface InvoiceFormData {
   approvalId: string;
 }
 
+export interface AccountInfo {
+  bankName: string;
+  email: string;
+  ifsc: string;
+  accountNo: string;
+  branch: string;
+}
 export interface InvoiceContextType {
   invoiceFormData: InvoiceFormData;
-  setInvoiceFormData: (data: InvoiceFormData) => void;
-  companyDetails: { billedBy: CompanyDetails; billedTo: CompanyDetails };
-  setCompanyDetails: (data: { billedBy: CompanyDetails; billedTo: CompanyDetails }) => void;
+  setInvoiceFormData: Dispatch<SetStateAction<InvoiceFormData>>;
+  companyDetails: { billedBy: CompanyDetails; billedTo: CompanyDetails; accountInfo: AccountInfo };
+  setCompanyDetails: Dispatch<SetStateAction<{
+    billedBy: CompanyDetails;
+    billedTo: CompanyDetails;
+    accountInfo: AccountInfo;
+  }>>;
   tableRows: TableRow[];
-  setTableRows: (rows: TableRow[]) => void;
+  setTableRows: Dispatch<SetStateAction<TableRow[]>>;
+  includeBankDetails: boolean;
+  setIncludeBankDetails: Dispatch<SetStateAction<boolean>>;
 }
-
 const InvoiceContext = createContext<InvoiceContextType | undefined>(undefined);
 
 export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
   const [invoiceFormData, setInvoiceFormData] = useState<InvoiceFormData>({
-    invoiceNo: '',
-    venue: '',
-    referredBy: '',
-    date: new Date().toISOString().split('T')[0],
-    approvalId:'' // Default to current date
+    invoiceNo: "",
+    venue: "",
+    referredBy: "",
+    date: new Date().toISOString().split("T")[0],
+    approvalId: "",
   });
 
   const [companyDetails, setCompanyDetails] = useState({
     billedBy: {
-      companyName: '',
-      companyAddress: '',
-      gstin: '',
-      email: '',
-      phone: '',
+      companyName: "",
+      email: "",
+      gstin: "",
+      pan: "",
+      companyAddress: "",
+      city: "",
+      pincode: "",
+      contact: "",
+     
+      logoUrl: "",
+      stampUrl: "",
     },
     billedTo: {
-      companyName: '',
-      companyAddress: '',
-      gstin: '',
-      email: '',
-      phone: '',
+      clientId: "",
+      clientName: "",
+      email: "",
+      gst: "",
+      pan: "",
+      clientOf : "",
+      add: "",
+      city: "",
+      pincode: "",
+      contact: "",
+    },
+    accountInfo: {
+      bankName: "",
+      email: "",
+      ifsc: "",
+      accountNo: "",
+      branch: "",
     },
   });
 
+
   const [tableRows, setTableRows] = useState<TableRow[]>([
-    // Initial empty row as an example
     {
-      item: '',
-      gstRate: 0,
-      date: new Date().toISOString().split('T')[0],
-      description: '',
+      item: "",
+      gstRate: 18,
+      date: new Date().toISOString().split("T")[0],
+      description: "",
       quantity: 0,
       rate: 0,
       amount: 0,
       cgst: 0,
       sgst: 0,
+      igst: 0,
       total: 0,
     },
   ]);
 
+  const [includeBankDetails, setIncludeBankDetails] = useState<boolean>(false);
   return (
     <InvoiceContext.Provider
       value={{
@@ -93,6 +139,8 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
         setCompanyDetails,
         tableRows,
         setTableRows,
+        includeBankDetails,
+        setIncludeBankDetails,
       }}
     >
       {children}
@@ -103,7 +151,7 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
 export const useInvoiceContext = () => {
   const context = useContext(InvoiceContext);
   if (!context) {
-    throw new Error('useInvoiceContext must be used within an InvoiceProvider');
+    throw new Error("useInvoiceContext must be used within an InvoiceProvider");
   }
   return context;
 };

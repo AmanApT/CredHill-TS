@@ -12,6 +12,7 @@ import { api } from "@/convex/_generated/api";
 const Dashboard = () => {
   const { user } = useKindeBrowserClient();
   const convex = useConvex();
+  console.log("HIIIII")
   const addUser = useMutation(api.functions.user.addUser);
   // const addAccount = useMutation(api.functions.account.addAccount);
   const addAccount = useMutation(api.functions.account.addAccount)
