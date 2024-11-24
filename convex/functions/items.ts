@@ -44,3 +44,13 @@ export const updateItem = mutation({
     });
   },
 });
+export const deleteItem = mutation({
+  args: {
+    _id: v.id("items"), // The ID of the item to delete
+  },
+  handler: async (ctx, args) => {
+    // Delete the item from the "items" collection using the provided ID
+    await ctx.db.delete(args._id);
+    return { success: true, message: "Item deleted successfully" };
+  },
+});

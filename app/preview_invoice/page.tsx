@@ -3,7 +3,7 @@ import PreviewInvoice from './_components/PreviewInvoice'
 
 const page = () => {
   return (
-    <div>
+    <div className='p-10 bg-slate-300'>
         <PreviewInvoice />
     </div>
   )

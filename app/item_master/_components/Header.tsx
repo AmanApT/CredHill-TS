@@ -47,6 +47,9 @@ const Header = () => {
     setIsOpen(!isOpen);
 
     toast("Item Added!");
+    setTimeout(()=>{
+      location.reload()
+    },1500)
   };
 
   useEffect(() => {

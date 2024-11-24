@@ -18,15 +18,16 @@ import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 
 type EachClient = {
+  _id?: string;
   clientName: string;
-  email: string;
-  gst: string;
-  pan: string;
-  clientOf: string;
   add: string;
+  clientOf: string;
+  email: string;
   city: string;
   pincode: string;
   contact: string;
+  gst: string;
+  pan: string;
 };
 
 type EditClientProps = {

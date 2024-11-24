@@ -84,7 +84,7 @@ const PreviewInvoice = () => {
     reactToPrintFn();
   }
   return (
-    <section ref={contentRef} className="p-4 ">
+    <section ref={contentRef} className="p-4 bg-white rounded-md ">
       <h2 className="text-2xl text-[#6538BF] ">Invoice</h2>
       <div className="mt-4 flex gap-5 text-sm">
         <div className="text-gray-500 font-semibold flex flex-col gap-1">
