@@ -45,7 +45,7 @@ const Header = () => {
         <Button className=" text-white flex items-center gap-2">
           <LogOut size={18} /> 
           
-          {innerWidth >= 768 && "Logout"}
+         Logout
         </Button>
       </LogoutLink>
             {/* <LogoutLink postLogoutRedirectURL="/">Logout</LogoutLink> */}
