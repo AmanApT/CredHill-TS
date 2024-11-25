@@ -23,7 +23,7 @@ const Dashboard = () => {
   const pathname = usePathname()
   const staticData = [
     {
-      title: "Creating Polished Invoices Effortlessly",
+      title: "Create Polished Invoices Effortlessly",
       desc: "Effeciently identify your client needs and cater your invoices accordingly",
       cta: "Create Invoice",
       ctaColor: "green",
