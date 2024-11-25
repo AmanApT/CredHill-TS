@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useMutation } from "convex/react";
 import Image from "next/image";
+import moment from 'moment'
 
 import { useParams } from "next/navigation";
 
@@ -174,7 +175,12 @@ const PreviewInvoice = () => {
         </div>
         <div className="flex flex-col font-semibold gap-1">
           <p>{invoiceFormData?.invoiceNo}</p>
-          <p>{invoiceFormData?.date}</p>
+          <p>
+          {moment(invoiceFormData?.date).format("DD/MM/YYYY")}
+            {/* {invoiceFormData?.date} */}
+
+
+          </p>
           {invoiceFormData?.venue && <p>{invoiceFormData?.venue}</p>}
           {invoiceFormData?.approvalId && <p>{invoiceFormData?.approvalId}</p>}
           {invoiceFormData?.referredBy && <p>{invoiceFormData?.referredBy}</p>}
@@ -250,12 +256,12 @@ const PreviewInvoice = () => {
           <thead className="bg-[#6538BF]  text-white ">
             <tr className="text-sm">
               <th className="rounded-tl-md "></th>
-              <th id="itemCol" className="text-left p-2  ">
+              <th id="itemCol" className="text-left p-2 w-[11rem] ">
                 Item
               </th>
-              <th>GST Rate</th>
+              <th className="w-[3rem]">GST Rate</th>
               <th>Date</th>
-              <th className="w-40">Description</th>
+              <th className="">Description</th>
               <th>Quantity</th>
               <th>Rate</th>
               <th>Amount</th>
@@ -285,7 +291,10 @@ const PreviewInvoice = () => {
                   <p className="text-[0.5rem]">HSN/SAC: {getHsn(row.item)}</p>
                 </td>
                 <td>{row.gstRate}</td>
-                <td>{row.date}</td>
+                <td>
+                {moment(row.date).format("DD/MM/YYYY")}
+                  {/* {row.date} */}
+                  </td>
                 <td className="break-words  whitespace-normal">
                   {row.description}
                 </td>

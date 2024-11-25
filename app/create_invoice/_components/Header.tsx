@@ -42,13 +42,14 @@ const Header = () => {
                 />
               </svg>
             </button>
-
-            <button
-              className="inline-block rounded bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring"
-              type="button"
-            >
-              Profile
-            </button>
+            <Link href={"/profile"}>
+              <button
+                className="inline-block rounded bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring"
+                type="button"
+              >
+                Profile
+              </button>
+            </Link>
           </div>
         </div>
       </div>

@@ -19,6 +19,12 @@ import { MdDelete } from "react-icons/md";
 import { Input } from "@/components/ui/input";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import {
   Command,
@@ -315,7 +321,6 @@ const InvoiceForm: React.FC = () => {
     setTableRows(updatedRows);
   };
 
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     section: string | undefined,
@@ -588,12 +593,31 @@ const InvoiceForm: React.FC = () => {
                           variant="outline"
                           role="combobox"
                           aria-expanded={openStates[index] || false}
-                          className="w-[200px] justify-between"
+                          className="w-[200px] justify-between text-ellipsis overflow-hidden whitespace-nowrap"
                         >
-                          {row.item
-                            ? items.find((item) => item.itemName === row.item)
-                                ?.itemName || "Choose Items"
-                            : "Choose Items"}
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                {row.item
+                                  ? items.find(
+                                      (item) => item.itemName === row.item
+                                    )?.itemName || "Choose Items"
+                                  : "Choose Items"}
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {row.item
+                                    ? ` ${
+                                        items.find(
+                                          (item) => item.itemName === row.item
+                                        )?.itemName || "Choose Items"
+                                      }`
+                                    : "Please select an item"}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
                           <ChevronsUpDown className="opacity-50" />
                         </Button>
                       </PopoverTrigger>

@@ -9,12 +9,12 @@ const Hero = () => {
            Create your own invoices!
             <strong className="font-extrabold text-red-700 sm:block">
               {" "}
-              Shivam Projection {" "}
+             {" "}
             </strong>
           </h1>
 
           <p className="mt-4 text-black">
-          Aman Pathak Here
+         
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-4">
