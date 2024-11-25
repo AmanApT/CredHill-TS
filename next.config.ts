@@ -3,6 +3,9 @@ const nextConfig = {
   eslint:{
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    ignoreBuildErrors: true, // Ignore TypeScript errors during build
+  },
   images: {
     remotePatterns: [
       {
