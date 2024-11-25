@@ -18,7 +18,6 @@ import { Donut } from "./_components/Donut";
 import { Graph } from "./_components/Graph";
 import { BarChartGraph } from "./_components/BarChartGraph";
 import { useInvoiceContext } from "@/contexts/InvoiceContexts";
-import { useRouter } from "next/navigation";
 import { usePathname } from 'next/navigation'
 const Dashboard = () => {
   const pathname = usePathname()
@@ -102,6 +101,7 @@ const Dashboard = () => {
           },
         })
         setTableRows([ {
+          hsn:"",
           item: "",
           gstRate: 18,
           date: new Date().toISOString().split("T")[0],

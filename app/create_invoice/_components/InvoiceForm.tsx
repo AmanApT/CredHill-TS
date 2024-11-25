@@ -18,16 +18,7 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { MdDelete } from "react-icons/md";
 import { Input } from "@/components/ui/input";
 import { useParams, useRouter } from "next/navigation";
-import {
-  Calculator,
-  Calendar,
-  Check,
-  ChevronsUpDown,
-  CreditCard,
-  Settings,
-  Smile,
-  User,
-} from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 
 import {
   Command,
@@ -36,8 +27,6 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command";
 import { toast } from "sonner";
 import {
@@ -45,8 +34,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-// Types
 
 const InvoiceForm: React.FC = () => {
   const {
@@ -60,13 +47,13 @@ const InvoiceForm: React.FC = () => {
     setIncludeBankDetails,
     invoices,
     items,
-    setItems
+    setItems,
   } = useInvoiceContext();
   console.log(invoices, "allInvoices");
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
   const [clients, setClients] = useState([]);
- 
+
   const getAllItems = async () => {
     const result = await convex.query(api.functions.items.getItems, {
       email: user?.email,
@@ -328,52 +315,7 @@ const InvoiceForm: React.FC = () => {
     setTableRows(updatedRows);
   };
 
-  // const [formData, setFormData] = useState<InvoiceFormData>({
-  //   invoiceNo: "",
-  //   venue: "",
-  //   referredBy: "",
-  //   approvalId:"",
-  //   date: new Date().toISOString().split('T')[0],
-  //   billedBy: {
-  //     companyName: "",
-  //     companyAddress: "",
-  //     gstin: "",
-  //     email: "",
-  //     phone: "",
-  //   },
-  //   billedTo: {
-  //     companyName: "",
-  //     companyAddress: "",
-  //     gstin: "",
-  //     email: "",
-  //     phone: "",
-  //   },
-  // });
 
-  // Input change handler
-  // const handleInputChange = (
-  //   e: React.ChangeEvent<HTMLInputElement>,
-  //   section?: "billedBy" | "billedTo",
-  //   field?:
-  //     | keyof CompanyDetails
-  //     | keyof Omit<InvoiceFormData, "billedBy" | "billedTo">
-  // ) => {
-  //   const value = e.target.value;
-  //   if (section && field) {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       [section]: {
-  //         ...prev[section],
-  //         [field]: value,
-  //       },
-  //     }));
-  //   } else if (field) {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       [field]: value,
-  //     }));
-  //   }
-  // };
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     section: string | undefined,
@@ -468,8 +410,8 @@ const InvoiceForm: React.FC = () => {
               {/* <p className="text-[#6538BF]">Billed By</p> */}
               <p className="font-bold my-2">Business Details</p>
               <p>{companyDetails?.billedBy.companyName.toUpperCase()}</p>
-              {companyDetails?.billedBy.add && (
-                <p>{companyDetails?.billedBy.add} </p>
+              {companyDetails?.billedBy?.companyAddress && (
+                <p>{companyDetails?.billedBy?.companyAddress} </p>
               )}
 
               <p>

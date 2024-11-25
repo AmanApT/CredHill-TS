@@ -9,7 +9,7 @@ import Image from "next/image";
 
 import { useParams } from "next/navigation";
 
-import { useRef, useState } from "react";
+import { useRef} from "react";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
 

@@ -4,7 +4,6 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useConvex } from "convex/react";
 import React, { useEffect, useState } from "react";
 import EditItem from "./EditItem";
-import { Button } from "@/components/ui/button";
 import DeleteItem from "./DeleteItem";
 // import DeleteItem from "./DeleteItem";
 
@@ -21,7 +20,7 @@ const ItemCards = () => {
     setItems(result);
   };
 
-  const handleDelete = (id) => {};
+  // const handleDelete = (id) => {};
   useEffect(() => {
     if (user?.email !== undefined) {
       getAllItems();
