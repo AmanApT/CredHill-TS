@@ -256,7 +256,7 @@ const PreviewInvoice = () => {
           <thead className="bg-[#6538BF]  text-white ">
             <tr className="text-sm">
               <th className="rounded-tl-md "></th>
-              <th id="itemCol" className="text-left p-2 w-[11rem] ">
+              <th id="itemCol" className="text-left p-2 w-[9rem] ">
                 Item
               </th>
               <th className="w-[3rem]">GST Rate</th>
