@@ -58,9 +58,9 @@ const PreviewInvoice = () => {
       "EIGHTEEN",
       "NINETEEN",
     ];
-    const placeValues = ["", "THOUSAND", "LAKH", "CRORE"];
+    // const placeValues = ["", "THOUSAND", "LAKH", "CRORE"];
 
-    function convertToWords(num) {
+    function convertToWords(num: number) {
       let words = "";
 
       if (num >= 1000) {
