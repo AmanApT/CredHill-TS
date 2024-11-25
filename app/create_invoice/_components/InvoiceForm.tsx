@@ -15,7 +15,7 @@ import { api } from "@/convex/_generated/api";
 import { useConvex } from "convex/react";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
-import { MdDelete } from "react-icons/md";
+import { MdAdd, MdAddBox, MdDelete } from "react-icons/md";
 import { Input } from "@/components/ui/input";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
@@ -519,8 +519,8 @@ const InvoiceForm: React.FC = () => {
         <h2 className="text-xl font-semibold mb-6">Invoice Items</h2>
 
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-purple-100 dark:bg-gray-700 dark:text-gray-400">
+          <table className="w-full text-sm text-left rtl:text-right text-black dark:text-gray-400">
+            <thead className="text-xs  uppercase bg-purple-600 text-white ">
               <tr>
                 <th scope="col" className="px-6 py-3 ">
                   Item name
@@ -574,7 +574,7 @@ const InvoiceForm: React.FC = () => {
                 >
                   <th
                     scope="row"
-                    className="px-3 py-4  font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    className="px-3 py-4  font-medium text-black-900 whitespace-nowrap dark:text-white"
                   >
                     {/* <Input
                       placeholder="Item Name"
@@ -732,9 +732,9 @@ const InvoiceForm: React.FC = () => {
         </div>
         <button
           onClick={addRow}
-          className="my-4  px-4 py-2 bg-purple-400 text-white rounded shadow hover:bg-purple-600"
+          className="my-4 w-20 flex items-center justify-center gap-2 px-2 py-2 bg-purple-500 text-white rounded shadow hover:bg-purple-300"
         >
-          Add New Entry
+          <MdAdd size={20} /> Add  
         </button>
       </div>
 

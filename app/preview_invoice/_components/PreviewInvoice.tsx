@@ -6,17 +6,24 @@ import { api } from "@/convex/_generated/api";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useMutation } from "convex/react";
 import Image from "next/image";
-import moment from 'moment'
+import moment from "moment";
 
 import { useParams } from "next/navigation";
 
-import { useRef} from "react";
+import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
+import Link from "next/link";
+import { PencilIcon, Printer, Save } from "lucide-react";
 
 const PreviewInvoice = () => {
-  const { invoiceFormData, companyDetails, tableRows, includeBankDetails , items} =
-    useInvoiceContext();
+  const {
+    invoiceFormData,
+    companyDetails,
+    tableRows,
+    includeBankDetails,
+    items,
+  } = useInvoiceContext();
   const params = useParams<{
     invoiceId: string;
     tag: string;
@@ -113,11 +120,11 @@ const PreviewInvoice = () => {
   const getHsn = (item: string) => {
     const newItem = items.find((eachItem) => eachItem.itemName === item);
     console.log(newItem);
-  
+
     // Return newItem.hsn if the item is found, otherwise return a fallback value
     return newItem ? newItem.hsn : ""; // or "" if you prefer an empty string
   };
-  
+
   const { amount, cgst, sgst, total, igst } = calculateTotalSums();
   const saveInvoice = async () => {
     await addInvoice({
@@ -176,10 +183,8 @@ const PreviewInvoice = () => {
         <div className="flex flex-col font-semibold gap-1">
           <p>{invoiceFormData?.invoiceNo}</p>
           <p>
-          {moment(invoiceFormData?.date).format("DD/MM/YYYY")}
+            {moment(invoiceFormData?.date).format("DD/MM/YYYY")}
             {/* {invoiceFormData?.date} */}
-
-
           </p>
           {invoiceFormData?.venue && <p>{invoiceFormData?.venue}</p>}
           {invoiceFormData?.approvalId && <p>{invoiceFormData?.approvalId}</p>}
@@ -252,9 +257,9 @@ const PreviewInvoice = () => {
       </section>
 
       <section>
-        <table className="w-full mt-6 ">
+        <table className="w-full mt-6  ">
           <thead className="bg-[#6538BF]  text-white ">
-            <tr className="text-sm">
+            <tr className="text-xs">
               <th className="rounded-tl-md "></th>
               <th id="itemCol" className="text-left p-2 w-[9rem] ">
                 Item
@@ -280,7 +285,7 @@ const PreviewInvoice = () => {
           <tbody>
             {tableRows.map((row, idx) => (
               <tr
-                className={`text-center  text-sm ${
+                className={`text-center  text-xs ${
                   idx % 2 !== 0 ? "bg-white" : "bg-[#efebf8]"
                 }`}
                 key={idx}
@@ -292,9 +297,9 @@ const PreviewInvoice = () => {
                 </td>
                 <td>{row.gstRate}</td>
                 <td>
-                {moment(row.date).format("DD/MM/YYYY")}
+                  {moment(row.date).format("DD/MM/YYYY")}
                   {/* {row.date} */}
-                  </td>
+                </td>
                 <td className="break-words  whitespace-normal">
                   {row.description}
                 </td>
@@ -396,11 +401,18 @@ const PreviewInvoice = () => {
 
       <div className="flex justify-between avoid-break">
         <div className="gap-5 flex mt-5">
+          <Link href={"/create_invoice"} className="no-print">
+            <Button>
+              <PencilIcon />
+              Edit</Button>
+          </Link>
           <Button onClick={printInvoice} className="no-print">
+            <Printer />
             Print
           </Button>
           {params?.invoiceId === undefined ? (
-            <Button onClick={saveInvoice} className="no-print">
+            <Button  onClick={saveInvoice} className="no-print bg-purple-600">
+              <Save />
               Save Invoice
             </Button>
           ) : (
