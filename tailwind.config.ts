@@ -55,7 +55,10 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+		  backgroundImage: {
+			'custom-gradient': 'linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%)',
+		  },
   	}
   },
   plugins: [require("tailwindcss-animate")],

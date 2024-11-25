@@ -5,13 +5,23 @@ import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import { api } from "@/convex/_generated/api";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useMutation } from "convex/react";
-import { useRef } from "react";
+import Image from "next/image";
+
+import { useParams } from "next/navigation";
+
+import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
 
 const PreviewInvoice = () => {
-  const { invoiceFormData, companyDetails, tableRows, includeBankDetails } =
+  const { invoiceFormData, companyDetails, tableRows, includeBankDetails , items} =
     useInvoiceContext();
+  const params = useParams<{
+    invoiceId: string;
+    tag: string;
+    item: string;
+  }>();
+
   const numberToWords = (amount: number) => {
     const singleDigits = [
       "",
@@ -84,6 +94,7 @@ const PreviewInvoice = () => {
   };
   const { user } = useKindeBrowserClient();
   const addInvoice = useMutation(api.functions.invoice.addInvoice);
+  const updateInvoiceData = useMutation(api.functions.invoice.updateInvoice);
   const calculateTotalSums = () => {
     return tableRows.reduce(
       (sums, row) => {
@@ -97,10 +108,18 @@ const PreviewInvoice = () => {
       { amount: 0, cgst: 0, sgst: 0, total: 0, igst: 0 }
     );
   };
-  console.log(companyDetails, "company");
+  // console.log(companyDetails, "company");
+  const getHsn = (item: string) => {
+    const newItem = items.find((eachItem) => eachItem.itemName === item);
+    console.log(newItem);
+  
+    // Return newItem.hsn if the item is found, otherwise return a fallback value
+    return newItem ? newItem.hsn : ""; // or "" if you prefer an empty string
+  };
+  
   const { amount, cgst, sgst, total, igst } = calculateTotalSums();
-  const saveInvoice = () => {
-    addInvoice({
+  const saveInvoice = async () => {
+    await addInvoice({
       invoiceNo: invoiceFormData?.invoiceNo,
       venue: invoiceFormData?.venue,
       approvalId: invoiceFormData?.approvalId,
@@ -115,11 +134,31 @@ const PreviewInvoice = () => {
     });
 
     toast("Invoice Saved!");
+    // router.push('/dashboard')
   };
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
   const printInvoice = () => {
     reactToPrintFn();
+  };
+  const updateInvoice = async () => {
+    updateInvoiceData({
+      _id: params?.invoiceId,
+      invoiceNo: invoiceFormData?.invoiceNo,
+      venue: invoiceFormData?.venue,
+      approvalId: invoiceFormData?.approvalId,
+      date: invoiceFormData?.date,
+      ref: invoiceFormData?.referredBy,
+      billedBy: user?.email,
+      clientId: companyDetails?.billedTo?._id,
+      totalAmount: total.toString(),
+      tax: (cgst + sgst + igst).toString(),
+      invoiceStatus: false,
+      item: JSON.stringify(tableRows),
+    });
+
+    toast("Invoice Updated!");
+    // router.push('/dashboard')
   };
 
   return (
@@ -130,16 +169,15 @@ const PreviewInvoice = () => {
           <p>Invoice No #</p>
           <p>Invoice Date</p>
           {invoiceFormData?.venue && <p>Venue</p>}
-          <p>Approval ID</p>
-          <p>Order Referred By</p>
+          {invoiceFormData?.approvalId && <p>Approval ID</p>}
+          {invoiceFormData?.referredBy && <p>Order Reffered By</p>}
         </div>
         <div className="flex flex-col font-semibold gap-1">
           <p>{invoiceFormData?.invoiceNo}</p>
           <p>{invoiceFormData?.date}</p>
           {invoiceFormData?.venue && <p>{invoiceFormData?.venue}</p>}
-
-          <p>{invoiceFormData?.approvalId}</p>
-          <p>{invoiceFormData?.referredBy}</p>
+          {invoiceFormData?.approvalId && <p>{invoiceFormData?.approvalId}</p>}
+          {invoiceFormData?.referredBy && <p>{invoiceFormData?.referredBy}</p>}
         </div>
       </div>
       <section className="flex gap-4 mt-3 justify-between">
@@ -148,46 +186,62 @@ const PreviewInvoice = () => {
           <p className="font-bold">
             {companyDetails?.billedBy.companyName.toUpperCase()}
           </p>
-          <p>{companyDetails?.billedBy.add}</p>
-          <p>
-            {companyDetails?.billedBy.city} - {companyDetails?.billedBy.pincode}
-          </p>
+          {companyDetails?.billedBy.add && (
+            <p>{companyDetails?.billedBy.add}</p>
+          )}
 
-          <div>
-            <span className="font-bold">GSTIN:</span>
-            <span>{companyDetails?.billedBy.gstin}</span>
-          </div>
-          <div>
-            <span className="font-bold">Email:</span>
-            <span>{companyDetails?.billedBy.email}</span>
-          </div>
-          <div>
-            <span className="font-bold">Phone:</span>
-            <span>{companyDetails?.billedBy.contact}</span>
-          </div>
+          <p>
+            {companyDetails?.billedBy.city} {companyDetails?.billedBy.pincode}
+          </p>
+          {companyDetails?.billedBy.gst && (
+            <div>
+              <span className="font-bold">GSTIN:</span>
+              <span>{companyDetails?.billedBy.gst}</span>
+            </div>
+          )}
+          {companyDetails?.billedBy.email && (
+            <div>
+              <span className="font-bold">Email:</span>
+              <span>{companyDetails?.billedBy.email}</span>
+            </div>
+          )}
+          {companyDetails?.billedBy.contact && (
+            <div>
+              <span className="font-bold">Phone:</span>
+              <span>{companyDetails?.billedBy.contact}</span>
+            </div>
+          )}
         </div>
         <div className="flex w-[45vw] text-sm flex-col  rounded-md p-3 bg-[#efebf8]">
           <p className="text-[#6538BF] text-lg">Billed To</p>
           <p className="font-bold">
             {companyDetails?.billedTo.clientName.toUpperCase()}
           </p>
-          <p>{companyDetails?.billedTo.add}</p>
-          <p>
-            {companyDetails?.billedTo.city} - {companyDetails?.billedTo.pincode}
-          </p>
+          {companyDetails?.billedTo.add && (
+            <p>{companyDetails?.billedTo.add}</p>
+          )}
 
-          <div>
-            <span className="font-bold">GSTIN: </span>
-            <span>{companyDetails?.billedTo.gst} </span>
-          </div>
-          <div>
-            <span className="font-bold">Email: </span>
-            <span>{companyDetails?.billedTo.email} </span>
-          </div>
-          <div>
-            <span className="font-bold">Phone: </span>
-            <span>{companyDetails?.billedTo.contact} </span>
-          </div>
+          <p>
+            {companyDetails?.billedTo.city} {companyDetails?.billedTo.pincode}
+          </p>
+          {companyDetails?.billedTo.gst && (
+            <div>
+              <span className="font-bold">GSTIN: </span>
+              <span>{companyDetails?.billedTo.gst} </span>
+            </div>
+          )}
+          {companyDetails?.billedTo.email && (
+            <div>
+              <span className="font-bold">Email: </span>
+              <span>{companyDetails?.billedTo.email} </span>
+            </div>
+          )}
+          {companyDetails?.billedTo.contact && (
+            <div>
+              <span className="font-bold">Phone: </span>
+              <span>{companyDetails?.billedTo.contact} </span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -228,7 +282,7 @@ const PreviewInvoice = () => {
                 <td className="  p-2 py-3">{idx + 1}</td>
                 <td className="text-left">
                   <p>{row.item}</p>
-                  <p className="text-[0.5rem]">(HSN/SAC: 997321)</p>
+                  <p className="text-[0.5rem]">HSN/SAC: {getHsn(row.item)}</p>
                 </td>
                 <td>{row.gstRate}</td>
                 <td>{row.date}</td>
@@ -254,7 +308,7 @@ const PreviewInvoice = () => {
           </tbody>
         </table>
 
-        <section className="flex justify-between">
+        <section className="flex justify-between h-60 ">
           <div className="w-1/2  avoid-break">
             <div className="mt-4 font-semibold ">
               Total(in words): {numberToWords(total)}
@@ -274,7 +328,7 @@ const PreviewInvoice = () => {
                     <p>{companyDetails?.billedBy?.companyName}</p>
                     <p>{companyDetails?.accountInfo?.accountNo}</p>
                     <p>{companyDetails?.accountInfo?.ifsc}</p>
-                
+
                     {/* <p>Current</p> */}
                     <p>{companyDetails?.accountInfo?.bankName}</p>
                   </div>
@@ -313,18 +367,39 @@ const PreviewInvoice = () => {
               <span>₹ {total.toFixed(2)}</span>
             </div>
             <hr className="border border-black" />
-            <div>{/* sign */}</div>
+            <div>
+              {" "}
+              {companyDetails?.billedBy?.stampUrl && (
+                <div className=" avoid-break ">
+                  <Image
+                    className=""
+                    width={120}
+                    height={120}
+                    alt="Company Stamp"
+                    src={companyDetails?.billedBy?.stampUrl}
+                  ></Image>
+                </div>
+              )}
+            </div>
           </div>
         </section>
       </section>
 
-      <div className="flex gap-4">
-        <Button onClick={printInvoice} className="no-print">
-          Print
-        </Button>
-        <Button onClick={saveInvoice} className="no-print">
-          Save Invoice
-        </Button>
+      <div className="flex justify-between avoid-break">
+        <div className="gap-5 flex mt-5">
+          <Button onClick={printInvoice} className="no-print">
+            Print
+          </Button>
+          {params?.invoiceId === undefined ? (
+            <Button onClick={saveInvoice} className="no-print">
+              Save Invoice
+            </Button>
+          ) : (
+            <Button onClick={updateInvoice} className="no-print">
+              Update Invoice
+            </Button>
+          )}
+        </div>
       </div>
     </section>
   );

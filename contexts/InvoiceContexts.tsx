@@ -27,6 +27,7 @@ export interface CompanyDetails {
 export interface TableRow {
   item: string;
   gstRate: number;
+  hsn:string,
   date: string;
   description: string;
   quantity: number;
@@ -65,6 +66,10 @@ export interface InvoiceContextType {
   setTableRows: Dispatch<SetStateAction<TableRow[]>>;
   includeBankDetails: boolean;
   setIncludeBankDetails: Dispatch<SetStateAction<boolean>>;
+  invoices: [];
+  setInvoices: Dispatch<SetStateAction<[]>>;
+  setItems: Dispatch<SetStateAction<[]>>;
+  items:[]
 }
 const InvoiceContext = createContext<InvoiceContextType | undefined>(undefined);
 
@@ -76,6 +81,8 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
     date: new Date().toISOString().split("T")[0],
     approvalId: "",
   });
+
+  const [invoices, setInvoices] = useState<[]>();
 
   const [companyDetails, setCompanyDetails] = useState({
     billedBy: {
@@ -116,6 +123,7 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
   const [tableRows, setTableRows] = useState<TableRow[]>([
     {
       item: "",
+      hsn:"",
       gstRate: 18,
       date: new Date().toISOString().split("T")[0],
       description: "",
@@ -130,6 +138,7 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
   ]);
 
   const [includeBankDetails, setIncludeBankDetails] = useState<boolean>(false);
+  const [items, setItems] = useState<[]>([]);
   return (
     <InvoiceContext.Provider
       value={{
@@ -141,6 +150,10 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
         setTableRows,
         includeBankDetails,
         setIncludeBankDetails,
+        invoices,
+        setInvoices,
+        items,
+        setItems
       }}
     >
       {children}

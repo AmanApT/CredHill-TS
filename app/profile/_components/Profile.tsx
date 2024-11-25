@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useConvex, useMutation } from "convex/react";
 import { toast } from "sonner";
+
 // import { useToast } from "@/hooks/use-toast"
 // import { toast, useToast } from "@/hooks/use-toast";
 // import { useToast } from "@/hooks/use-toast";
@@ -241,15 +242,31 @@ const Profile = () => {
             />
           </div>
         </div>
-        <div className="h-25">
-          <Input
-            onChange={(e) => {
-              handleInputChange(e.target.value, "logoUrl");
-            }}
-            value={profileDetails?.logoUrl}
-            disabled={!editMode}
-            placeholder="Image URL"
-          />
+        <div className="flex justify-between">
+        <div className="w-[40%] ">
+            <p className="text-sm text-gray-700">Logo URL</p>
+            <Input
+              onChange={(e) => {
+                handleInputChange(e.target.value, "logoUrl");
+              }}
+              disabled={!editMode}
+              value={profileDetails?.logoUrl}
+              className="mt-2 bg-slate-50 "
+              placeholder="Profile Photo URL"
+            />
+          </div>
+        <div className="w-[40%] ">
+            <p className="text-sm text-gray-700">Stamp URL</p>
+            <Input
+              onChange={(e) => {
+                handleInputChange(e.target.value, "stampUrl");
+              }}
+              disabled={!editMode}
+              value={profileDetails?.stampUrl}
+              className="mt-2 bg-slate-50 "
+              placeholder="Company Stamp URL"
+            />
+          </div>
         </div>
       </section>
     </section>

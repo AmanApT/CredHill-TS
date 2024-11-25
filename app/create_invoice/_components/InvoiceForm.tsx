@@ -17,7 +17,35 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 import { MdDelete } from "react-icons/md";
 import { Input } from "@/components/ui/input";
+import { useParams, useRouter } from "next/navigation";
+import {
+  Calculator,
+  Calendar,
+  Check,
+  ChevronsUpDown,
+  CreditCard,
+  Settings,
+  Smile,
+  User,
+} from "lucide-react";
 
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
+import { toast } from "sonner";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 // Types
 
 const InvoiceForm: React.FC = () => {
@@ -30,12 +58,70 @@ const InvoiceForm: React.FC = () => {
     setTableRows,
     includeBankDetails,
     setIncludeBankDetails,
+    invoices,
+    items,
+    setItems
   } = useInvoiceContext();
-
+  console.log(invoices, "allInvoices");
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
-
   const [clients, setClients] = useState([]);
+ 
+  const getAllItems = async () => {
+    const result = await convex.query(api.functions.items.getItems, {
+      email: user?.email,
+    });
+    console.log(result);
+    setItems(result);
+  };
+  const [openStates, setOpenStates] = useState({});
+  const toggleOpenState = (rowIndex, isOpen) => {
+    setOpenStates((prev) => ({
+      ...prev,
+      [rowIndex]: isOpen,
+    }));
+  };
+
+  const params = useParams<{
+    invoiceId: string;
+    tag: string;
+    item: string;
+  }>();
+  const router = useRouter();
+  useEffect(() => {
+    if (params?.invoiceId !== undefined) {
+      console.log("Chalaa");
+      const foundInvoice = invoices?.find(
+        (inv) => inv?._id === params?.invoiceId
+      );
+      console.log(foundInvoice, "found");
+      setInvoiceFormData({
+        invoiceNo: foundInvoice?.invoiceNo,
+        venue: foundInvoice?.venue,
+        referredBy: foundInvoice?.ref,
+        date: foundInvoice?.date,
+        approvalId: foundInvoice?.approvalId,
+      });
+      const clientId = foundInvoice?.clientId;
+      console.log(clientId, "clientId");
+      const client = clients.find((client) => client._id === clientId);
+      console.log(client, "client");
+      setCompanyDetails((prevDetails) => ({
+        ...prevDetails,
+        billedTo: client,
+      }));
+
+      setTableRows(JSON?.parse(foundInvoice?.item));
+    }
+  }, [
+    clients,
+    invoices,
+    params?.invoiceId,
+    setCompanyDetails,
+    setInvoiceFormData,
+    setTableRows,
+  ]);
+
   const getUser = async () => {
     if (!user?.email) return; // Skip if email is not available
     try {
@@ -60,6 +146,7 @@ const InvoiceForm: React.FC = () => {
     getUser();
     if (user?.email) {
       getBankDetails();
+      getAllItems();
     }
   }, [user]);
   const getBankDetails = async () => {
@@ -94,9 +181,9 @@ const InvoiceForm: React.FC = () => {
     }
   }, [user]);
   console.log(includeBankDetails, "Hello");
-  const [selectedClient, setSelectedClient] = useState(null);
+  // const [selectedClient, setSelectedClient] = useState(null);
 
-  const handleSelectChange = (value) => {
+  const handleSelectChange = (value: unknown) => {
     const client = clients.find((client) => client?.clientName === value);
 
     setCompanyDetails((prevDetails) => ({
@@ -104,7 +191,7 @@ const InvoiceForm: React.FC = () => {
       billedTo: client,
     }));
   };
-
+  console.log(clients, "allClients");
   // const router = useRouter();
 
   // const [rows, setRows] = useState<TableRow[]>([
@@ -127,6 +214,7 @@ const InvoiceForm: React.FC = () => {
       ...tableRows,
       {
         item: "",
+        hsn: "",
         igst: 0,
         gstRate: 18,
         date: new Date().toISOString().split("T")[0],
@@ -142,6 +230,9 @@ const InvoiceForm: React.FC = () => {
   };
 
   const deleteRow = (index: number) => {
+    if (tableRows.length == 1) {
+      return;
+    }
     setTableRows(tableRows.filter((_, i) => i !== index));
   };
   const calculateTotalSums = () => {
@@ -157,7 +248,47 @@ const InvoiceForm: React.FC = () => {
       { amount: 0, cgst: 0, sgst: 0, total: 0, igst: 0 }
     );
   };
+  useEffect(() => {
+    if (invoices !== undefined) {
+      const sortedInvoices = [...invoices].sort(
+        (a, b) => b._creationTime - a._creationTime
+      );
 
+      const mostRecentInvoice = sortedInvoices[0]?.invoiceNo;
+      setInvoiceFormData({
+        ...invoiceFormData,
+        invoiceNo: (parseInt(mostRecentInvoice) + 1).toString(),
+      });
+    }
+  }, [invoices]);
+  const previewInvoice = () => {
+    if (invoiceFormData?.invoiceNo === "") {
+      toast("Invoice number can't be empty!", {
+        style: {
+          backgroundColor: "black",
+          color: "white",
+        },
+      });
+
+      // alert("Invoice cannot be empty")
+      return;
+    }
+    if (companyDetails?.billedTo?.clientName === "") {
+      toast("Select Client", {
+        style: {
+          backgroundColor: "black",
+          color: "white",
+        },
+      });
+      return;
+    }
+
+    if (params?.invoiceId === undefined) {
+      router.push("/preview_invoice");
+    } else {
+      router.push(`/update_invoice/${params?.invoiceId}`);
+    }
+  };
   const { amount, cgst, sgst, total, igst } = calculateTotalSums();
   const handleChange = (
     index: number,
@@ -172,13 +303,14 @@ const InvoiceForm: React.FC = () => {
             // Auto-calculate fields based on Quantity & Rate
             ...(field === "quantity" || field === "rate"
               ? (() => {
-                  const quantity = field === "quantity" ? value : tableRow.quantity;
+                  const quantity =
+                    field === "quantity" ? value : tableRow.quantity;
                   const rate = field === "rate" ? value : tableRow.rate;
                   const amount = quantity * rate;
                   const isLocalGST =
                     companyDetails?.billedTo?.gst?.substring(0, 2) === "07";
                   const gstRate = tableRow.gstRate;
-  
+
                   return {
                     amount,
                     cgst: isLocalGST ? (amount * gstRate) / 200 : 0,
@@ -195,7 +327,7 @@ const InvoiceForm: React.FC = () => {
     );
     setTableRows(updatedRows);
   };
-  
+
   // const [formData, setFormData] = useState<InvoiceFormData>({
   //   invoiceNo: "",
   //   venue: "",
@@ -311,20 +443,22 @@ const InvoiceForm: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex  justify-between gap-6 mt-8">
+      <div className="flex  justify-between  mt-8">
         <div className="bg-slate-50 rounded-md p-4">
           <div className="text-sm flex gap-5 mb-2 items-center">
             <span className=" font-semibold text-lg">Billed By</span>
             <span className="text-gray-500">Your Details</span>
           </div>
           <div>
-            <Select onValueChange={handleSelectChange}>
-              <SelectTrigger className="w-[380px]">
+            <Select>
+              <SelectTrigger className="w-[440px]">
                 <SelectValue placeholder="Billed By" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="Shivam">Shivam Projection</SelectItem>
+                  <SelectItem value="Shivam">
+                    {companyDetails?.billedBy?.companyName}
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -333,21 +467,34 @@ const InvoiceForm: React.FC = () => {
             <div className=" p-4 bg-white border my-3 rounded-md flex flex-col gap-2">
               {/* <p className="text-[#6538BF]">Billed By</p> */}
               <p className="font-bold my-2">Business Details</p>
-              <p>SHIVAM PROJECTION</p>
-              <p>241,242 L Extension, Mohan Garden, </p>
-              <p>Delhi, India- 110059</p>
-              <div>
-                <span className="font-bold">GSTIN:</span>
-                <span>07APZPP6140C1ZL</span>
-              </div>
-              <div>
-                <span className="font-bold">Email ID:</span>
-                <span>shivamprojection@gmail.com</span>
-              </div>
-              <div>
-                <span className="font-bold">Phone:</span>
-                <span>9899569229</span>
-              </div>
+              <p>{companyDetails?.billedBy.companyName.toUpperCase()}</p>
+              {companyDetails?.billedBy.add && (
+                <p>{companyDetails?.billedBy.add} </p>
+              )}
+
+              <p>
+                {" "}
+                {companyDetails?.billedBy.city}{" "}
+                {companyDetails?.billedBy.pincode}
+              </p>
+              {companyDetails?.billedBy.gst && (
+                <div>
+                  <span className="font-bold">GSTIN:</span>
+                  <span>{companyDetails?.billedBy.gst}</span>
+                </div>
+              )}
+              {companyDetails?.billedBy.email && (
+                <div>
+                  <span className="font-bold">Email ID:</span>
+                  <span>{companyDetails?.billedBy.email}</span>
+                </div>
+              )}
+              {companyDetails?.billedBy.contact && (
+                <div>
+                  <span className="font-bold">Phone:</span>
+                  <span>{companyDetails?.billedBy.contact}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -358,7 +505,7 @@ const InvoiceForm: React.FC = () => {
           </div>
           <div>
             <Select onValueChange={handleSelectChange}>
-              <SelectTrigger className="w-[380px]">
+              <SelectTrigger className="w-[440px]">
                 <SelectValue placeholder="Billed To" />
               </SelectTrigger>
               <SelectContent>
@@ -382,30 +529,41 @@ const InvoiceForm: React.FC = () => {
               {/* <p className="text-[#6538BF]">Billed By</p> */}
               <p className="font-bold my-2">Client Details</p>
               <p>{companyDetails?.billedTo?.clientName}</p>
-              <p>{companyDetails?.billedTo?.add} </p>
+              {companyDetails?.billedTo?.add && (
+                <p>{companyDetails?.billedTo?.add} </p>
+              )}
+
               <p>
                 {" "}
-                {companyDetails?.billedTo?.city},{" "}
+                {companyDetails?.billedTo?.city}{" "}
                 {companyDetails?.billedTo?.pincode}
               </p>
-              <div>
-                <span className="font-bold">GSTIN: </span>
-                <span>{companyDetails?.billedTo?.gst}</span>
-              </div>
-              <div>
-                <span className="font-bold">PAN: </span>
-                <span>{companyDetails?.billedTo?.pan}</span>
-              </div>
-              <div>
-                <span className="font-bold">Phone:</span>
-                <span>9899569229</span>
-              </div>
+              {companyDetails?.billedTo?.gst && (
+                <div>
+                  <span className="font-bold">GSTIN: </span>
+                  <span>{companyDetails?.billedTo?.gst}</span>
+                </div>
+              )}
+              {companyDetails?.billedTo?.pan && (
+                <div>
+                  <span className="font-bold">PAN: </span>
+                  <span>{companyDetails?.billedTo?.pan}</span>
+                </div>
+              )}
+              {companyDetails?.billedTo?.contact && (
+                <div>
+                  <span className="font-bold">Phone:</span>
+                  <span>{companyDetails?.billedTo?.contact}</span>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center my-3 gap-3 p-4 bg-white border rounded-md">
               <p>Select a Business/Client</p>
               <p>Or</p>
-              <Button className="bg-purple-500">Add a new client</Button>
+              <Link href={"/clients"}>
+                <Button className="bg-purple-500">Add a new client</Button>
+              </Link>
             </div>
           )}
         </div>
@@ -465,22 +623,73 @@ const InvoiceForm: React.FC = () => {
               {tableRows?.map((row, index) => (
                 <tr
                   key={index}
-                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                 >
                   <th
                     scope="row"
                     className="px-3 py-4  font-medium text-gray-900 whitespace-nowrap dark:text-white"
                   >
-                    <Input
+                    {/* <Input
+                      placeholder="Item Name"
                       value={row.item}
                       onChange={(e) =>
                         handleChange(index, "item", e.target.value)
                       }
                       className="w-40"
-                    />
+                    /> */}
+                    <Popover
+                      open={openStates[index] || false}
+                      onOpenChange={(isOpen) => toggleOpenState(index, isOpen)}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openStates[index] || false}
+                          className="w-[200px] justify-between"
+                        >
+                          {row.item
+                            ? items.find((item) => item.itemName === row.item)
+                                ?.itemName || "Choose Items"
+                            : "Choose Items"}
+                          <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput
+                            placeholder="Choose Item"
+                            className="h-9"
+                          />
+                          <CommandList>
+                            <CommandEmpty>No items !</CommandEmpty>
+                            <CommandGroup>
+                              {items.map((item, id) => (
+                                <CommandItem
+                                  key={id}
+                                  value={item.itemName}
+                                  onSelect={(currentValue) => {
+                                    const selectedItem = items.find(
+                                      (item) => item.itemName === currentValue
+                                    );
+                                    handleChange(index, "item", item.itemName);
+                                    // handleChange(index, "hsn", selectedItem?.hsn);
+
+                                    toggleOpenState(index, false); // Close combobox after selection
+                                  }}
+                                >
+                                  {item.itemName}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </th>
                   <td className="px-3 py-4">
                     <Input
+                      placeholder="GST "
                       value={row.gstRate}
                       onChange={(e) => {
                         handleChange(index, "gstRate", Number(e.target.value));
@@ -491,6 +700,7 @@ const InvoiceForm: React.FC = () => {
                   </td>
                   <td className="px-3 py-4">
                     <Input
+                      placeholder="Date"
                       value={row.date}
                       onChange={(e) =>
                         handleChange(index, "date", e.target.value)
@@ -502,6 +712,7 @@ const InvoiceForm: React.FC = () => {
                   <td className="px-3 py-4">
                     {" "}
                     <Input
+                      placeholder="Description"
                       value={row.description}
                       onChange={(e) =>
                         handleChange(index, "description", e.target.value)
@@ -634,9 +845,11 @@ const InvoiceForm: React.FC = () => {
           <div>{/* sign */}</div>
         </div>
       </div>
-      <Link href={"/preview_invoice"}>
-        <Button>Preview</Button>
-      </Link>
+      {params?.invoiceId === undefined ? (
+        <Button onClick={previewInvoice}>Preview</Button>
+      ) : (
+        <Button onClick={previewInvoice}>Preview Updates</Button>
+      )}
     </div>
   );
 };
