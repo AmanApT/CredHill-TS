@@ -325,7 +325,7 @@ const PreviewInvoice = () => {
         <section className="flex justify-between h-60 ">
           <div className="w-1/2  avoid-break">
             <div className="mt-4 font-semibold ">
-              Total(in words): {numberToWords(total)}
+              Total (in words): {numberToWords(total)}
             </div>
             {includeBankDetails && (
               <div className="mt-4 rounded-md  p-2 bg-[#efebf8]">
@@ -350,7 +350,7 @@ const PreviewInvoice = () => {
               </div>
             )}
           </div>
-          <div className="w-1/3 pr-4">
+          <div className="w-1/3 text-sm pr-4">
             <div className="mt-4 flex justify-between ">
               <div className=" flex flex-col gap-2">
                 <p>Amount</p>
@@ -363,12 +363,12 @@ const PreviewInvoice = () => {
                   <p>IGST</p>
                 )}
               </div>
-              <div className="flex flex-col gap-2 ">
-                <p>₹ {amount.toFixed(2)}</p>
+              <div className="flex flex-col gap-2 text-right">
+                <p>₹{amount.toFixed(2)}</p>
                 {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
                   <>
-                    <p>₹ {cgst.toFixed(2)} </p>
-                    <p>₹ {sgst.toFixed(2)}</p>
+                    <p>₹{cgst.toFixed(2)} </p>
+                    <p>₹{sgst.toFixed(2)}</p>
                   </>
                 ) : (
                   <p>₹ {igst.toFixed(2)}</p>
@@ -376,7 +376,7 @@ const PreviewInvoice = () => {
               </div>
             </div>
             <hr className="mt-4 border border-black" />
-            <div className="py-1 flex text-lg justify-between font-bold">
+            <div className="py-1 flex text-base justify-between font-bold">
               <span>Total (INR)</span>
               <span>₹ {total.toFixed(2)}</span>
             </div>

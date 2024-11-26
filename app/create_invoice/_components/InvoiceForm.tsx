@@ -779,7 +779,7 @@ const InvoiceForm: React.FC = () => {
         </div> */}
         <div className="w-1/3 pr-4">
           <div className="mt-4 flex justify-between ">
-            <div className=" flex flex-col gap-2">
+            <div className=" flex flex-col gap-2 ">
               <p>Amount</p>
               {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
                 <>
@@ -790,7 +790,7 @@ const InvoiceForm: React.FC = () => {
                 <p>IGST</p>
               )}
             </div>
-            <div className="flex flex-col gap-2 ">
+            <div className="flex flex-col gap-2 text-right">
               <p>₹ {amount.toFixed(2)}</p>
               {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
                 <>
