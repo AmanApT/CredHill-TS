@@ -173,7 +173,7 @@ const PreviewInvoice = () => {
     <section ref={contentRef} className="p-4 bg-white rounded-md ">
       <h2 className="text-2xl text-[#6538BF] ">Invoice</h2>
       <div className="mt-4 flex gap-5 text-sm">
-        <div className="text-gray-500 font-semibold flex flex-col gap-1">
+        <div className="text-gray-600 font-semibold  flex flex-col gap-1">
           <p>Invoice No #</p>
           <p>Invoice Date</p>
           {invoiceFormData?.venue && <p>Venue</p>}
@@ -192,8 +192,8 @@ const PreviewInvoice = () => {
         </div>
       </div>
       <section className="flex gap-4 mt-3 justify-between">
-        <div className="flex w-[45vw] text-sm flex-col rounded-md p-3 bg-[#efebf8]">
-          <p className="text-[#6538BF] text-lg">Billed By</p>
+        <div className="flex w-[45vw] text-xs flex-col rounded-md p-3 bg-[#efebf8]">
+          <p className="text-[#6538BF] text-base">Billed By</p>
           <p className="font-bold">
             {companyDetails?.billedBy.companyName.toUpperCase()}
           </p>
@@ -223,8 +223,8 @@ const PreviewInvoice = () => {
             </div>
           )}
         </div>
-        <div className="flex w-[45vw] text-sm flex-col  rounded-md p-3 bg-[#efebf8]">
-          <p className="text-[#6538BF] text-lg">Billed To</p>
+        <div className="flex w-[45vw] text-xs flex-col  rounded-md p-3 bg-[#efebf8]">
+          <p className="text-[#6538BF] text-base">Billed To</p>
           <p className="font-bold">
             {companyDetails?.billedTo.clientName.toUpperCase()}
           </p>

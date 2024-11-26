@@ -20,10 +20,10 @@ const Features = () => {
             >
               <Group className="text-orange-600" size={30} />
 
-              <h2 className="mt-4 text-xl font-bold ">Teams</h2>
+              <h2 className="mt-4 text-xl font-bold ">Invoice Generation</h2>
 
               <p className="mt-1 text-sm text-gray-800">
-                Create multiple teams for different projects
+               Create beautifully stunning invoices with buttery smooth comfort
               </p>
             </a>
             <a
@@ -32,10 +32,10 @@ const Features = () => {
             >
               <Group className="text-orange-600" size={30} />
 
-              <h2 className="mt-4 text-xl font-bold ">Teams</h2>
+              <h2 className="mt-4 text-xl font-bold ">Item Master</h2>
 
               <p className="mt-1 text-sm text-gray-800">
-                Create multiple teams for different projects
+               Maintain your inventory using Item Master
               </p>
             </a>
             <a
@@ -44,10 +44,10 @@ const Features = () => {
             >
               <Group className="text-orange-600" size={30} />
 
-              <h2 className="mt-4 text-xl font-bold ">Teams</h2>
+              <h2 className="mt-4 text-xl font-bold ">Analytics</h2>
 
               <p className="mt-1 text-sm text-gray-800">
-                Create multiple teams for different projects
+                Invoice and Client Analysis helps you track your business progress
               </p>
             </a>
             <a
@@ -56,10 +56,10 @@ const Features = () => {
             >
               <Group className="text-orange-600" size={30} />
 
-              <h2 className="mt-4 text-xl font-bold ">Teams</h2>
+              <h2 className="mt-4 text-xl font-bold ">Client Management</h2>
 
               <p className="mt-1 text-sm text-gray-800">
-                Create multiple teams for different projects
+                Client Management made easier and simple
               </p>
             </a>
             <a
@@ -68,10 +68,10 @@ const Features = () => {
             >
               <Group className="text-orange-600" size={30} />
 
-              <h2 className="mt-4 text-xl font-bold ">Teams</h2>
+              <h2 className="mt-4 text-xl font-bold ">Profile Management</h2>
 
               <p className="mt-1 text-sm text-gray-800">
-                Create multiple teams for different projects
+                Update your profile information in one go
               </p>
             </a>
             <a
@@ -80,10 +80,10 @@ const Features = () => {
             >
               <Group className="text-orange-600" size={30} />
 
-              <h2 className="mt-4 text-xl font-bold ">Teams</h2>
+              <h2 className="mt-4 text-xl font-bold ">Reliability</h2>
 
               <p className="mt-1 text-sm text-gray-800">
-                Create multiple teams for different projects
+                Zero bug and free to use reliable service offered by CredHill
               </p>
             </a>
           </div>
