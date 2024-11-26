@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
+import { Pencil } from "lucide-react";
 
 type EachClient = {
   _id?: string;
@@ -73,10 +74,11 @@ const EditClient: FunctionComponent<EditClientProps> = ({ clientDetails }) => {
   };
 
   return (
-    <div className="mb-2 absolute bottom-0 right-0 mx-4 cursor-pointer">
+    <div className="mx-4 cursor-pointer">
       <Sheet>
         <SheetTrigger asChild>
-          <Button className="bg-green-500">Edit Details</Button>
+          {/* <Pencil /> */}
+          <Button className="bg-orange-500">Edit Details</Button>
         </SheetTrigger>
         <SheetContent side="right">
           <SheetHeader>

@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
-
 import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 import EditClient from "./EditClient";
+import moment from "moment";
+
 type Client = {
   _id?: string;
   clientName: string;
@@ -17,6 +18,7 @@ type Client = {
   contact: string;
   gst: string;
   pan: string;
+  _creationTime: string;
 };
 
 const Clients = () => {
@@ -31,113 +33,74 @@ const Clients = () => {
     console.log(result);
     setClients(result);
   };
+
   useEffect(() => {
     if (user?.email !== undefined) {
       getAllClients();
     }
   }, [user]);
-  // const clients = [
-  //   {
-  //     invoiceNo: 1,
-  //     clientName: "Cipla",
-  //     invoiceDate: "1234",
-  //     totalAmount: 5000,
-  //   },
-  //   {
-  //     invoiceNo: 2,
-  //     clientName: "Cipla",
-  //     invoiceDate: "1234",
-  //     totalAmount: 5000,
-  //   },
-  //   {
-  //     invoiceNo: 3,
-  //     clientName: "Cipla",
-  //     invoiceDate: "1234",
-  //     totalAmount: 5000,
-  //   },
-  // ];
+
   return (
-    <section className="">
-      <div className="overflow-x-auto flex  flex-wrap gap-10 w-full p-8">
-        {clients?.map(
-          (
-            eachClient: {
-              clientName: string;
-              email: string;
-              contact: string;
-              gst: string;
-              pan: string;
-              add: string;
-              city: string;
-              pincode: string;
-              clientOf?: string;
-            },
-            id: React.Key | null | undefined
-          ) => {
-            return (
-              <section
-                key={id}
-                className="w-[45%] h-72 text-sm flex rounded-lg shadow bg-slate-600 transition hover:shadow-lg "
-              >
-                <div className="w-1/2 flex rounded-lg justify-center  bg-slate-600 text-white items-center text-[72px]">
-                  {eachClient?.clientName.charAt(0)}
-                </div>
-                <div className="w-full flex flex-col justify-center  relative rounded-lg rounded-l-none bg-white p-4">
-                  <p className="text-xl font-bold text-gray-600">
-                    {eachClient?.clientName}
-                  </p>
-                  {eachClient?.clientName && (
-                    <p className=" ">{eachClient?.email}</p>
-                  )}
-                  {eachClient?.contact && <hr className="border-[1px] my-2" />}
+    <section className="bg-slate-50">
+      <div className="overflow-x-auto flex justify-center flex-wrap gap-10 w-full p-8">
+        {clients?.map((eachClient, id) => (
+          <div
+            key={id}
+            className="relative w-[48%] border-gray-200 p-8 shadow-xl transition hover:border-orange-500/10 hover:shadow-orange-500/10 bg-white rounded-lg border sm:p-6 lg:p-8"
+          >
+            <span className="absolute inset-x-0 bottom-0 h-2 bg-gradient-to-r from-orange-300 via-orange-500 to-purple-600"></span>
 
-                  {eachClient?.contact && (
-                    <p>Contact : {eachClient?.contact}</p>
-                  )}
+            <div className="sm:flex sm:justify-between sm:gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 sm:text-xl">
+                  {eachClient?.clientName}
+                </h3>
+                <p className="mt-1 text-xs font-medium text-gray-600">
+                  {eachClient?.email}
+                </p>
+              </div>
+            </div>
 
-                  {eachClient?.gst && (
-                    <p>
-                      GSTIN :{" "}
-                      <span className="text-blue-500 "> {eachClient?.gst}</span>
-                    </p>
-                  )}
+            <div className="mt-4">
+              <p className="text-pretty text-sm text-gray-500">
+                {eachClient?.add} {eachClient?.city} {eachClient?.pincode}
+              </p>
+              <div className="text-pretty text-sm text-gray-500 mt-3">
+                {eachClient?.gst && (
+                  <div>
+                    <span className="font-bold">GST: </span>
+                    <span>{eachClient?.gst}</span>
+                  </div>
+                )}
+                {eachClient?.pan && (
+                  <div>
+                    <span className="font-bold">PAN: </span>
+                    <span>{eachClient?.pan}</span>
+                  </div>
+                )}
+                {eachClient?.contact && (
+                  <div>
+                    <span className="font-bold">Contact: </span>
+                    <span>{eachClient?.contact}</span>
+                  </div>
+                )}
+              </div>
+            </div>
 
-                  {eachClient?.pan && (
-                    <p>
-                      PAN :{" "}
-                      <span className="text-blue-500 "> {eachClient?.pan}</span>
-                    </p>
-                  )}
-                  {eachClient?.add && <hr className="border-[1px] my-2" />}
+            <dl className="mt-6 flex justify-between sm:gap-6">
+              <div className="flex flex-col-reverse">
+                <dt className="text-sm font-medium text-gray-600">
+                  Created At
+                </dt>
+                <dd className="text-xs text-gray-500">
+                  {moment(eachClient?._creationTime).format("DD MMM, YYYY")}
+                </dd>
+              </div>
 
-                  {eachClient?.add && <p>Address: {eachClient?.add}</p>}
-                  {eachClient?.city && (
-                    <p>
-                      City:{" "}
-                      <span className="text-blue-500 ">
-                        {" "}
-                        {eachClient?.city}
-                      </span>
-                    </p>
-                  )}
-                  {eachClient?.pincode && (
-                    <p>
-                      PIN:{" "}
-                      <span className="text-blue-500 ">
-                        {" "}
-                        {eachClient?.pincode}
-                      </span>
-                    </p>
-                  )}
-                  {/* <Button className="bg-green-700 mb-2 absolute bottom-0 right-0 mx-4">
-                  Edit Details
-                </Button> */}
-                  <EditClient clientDetails={eachClient} />
-                </div>
-              </section>
-            );
-          }
-        )}
+              <EditClient clientDetails={eachClient} />
+            </dl>
+          </div>
+        ))}
       </div>
     </section>
   );

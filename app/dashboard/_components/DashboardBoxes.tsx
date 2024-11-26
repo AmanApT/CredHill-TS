@@ -35,7 +35,7 @@ const DashboardBoxes: React.FC<DashboardBoxesProps> = ({ data }) => {
           </Link>
         ) : (
           <Link href={data?.href}>
-            <Button className={`bg-red-500 w-36`}>{data.cta}</Button>
+            <Button className={`bg-orange-500 w-36`}>{data.cta}</Button>
           </Link>
         )}
       </div>
