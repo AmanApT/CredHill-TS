@@ -589,6 +589,7 @@ const InvoiceForm: React.FC = () => {
                       onOpenChange={(isOpen) => toggleOpenState(index, isOpen)}
                     >
                       <PopoverTrigger asChild>
+                        
                         <Button
                           variant="outline"
                           role="combobox"

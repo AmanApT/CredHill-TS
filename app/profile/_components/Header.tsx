@@ -41,7 +41,7 @@ const Header = () => {
                 />
               </svg>
             </button>
-            <LogoutLink>
+            <LogoutLink postLogoutRedirectURL="/">
         <Button className=" text-white flex items-center gap-2">
           <LogOut size={18} /> 
           
