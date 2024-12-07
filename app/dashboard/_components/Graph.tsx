@@ -39,7 +39,7 @@ const chartConfig = {
 
 export function Graph() {
   return (
-    <Card className="w-[40%]">
+    <Card className="w-full md:w-[40%]">
       <CardHeader>
         <CardTitle>Area Chart - Gradient</CardTitle>
         <CardDescription>

@@ -136,11 +136,11 @@ const Header = () => {
 
             <Dialog open={isOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger  onClick={() => setIsOpen(true)} asChild>
-                <Button variant="outline">Create New Client</Button>
+                <Button className="py-6" variant="outline">Create New Client</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
-                  <DialogTitle>Create New Client</DialogTitle>
+                  <DialogTitle className="">Create New Client</DialogTitle>
                   <DialogDescription>
                     Fill all the client details here!
                   </DialogDescription>

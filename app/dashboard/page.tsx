@@ -181,15 +181,15 @@ const Dashboard = () => {
           <Button className="bg-red-400">Item Master</Button>
         </Link>
       </div> */}
-      <div className="flex justify-between p-5">
+      <div className="flex flex-col md:flex-row justify-between p-5">
         <DashboardBoxes data={staticData[0]} />
         <DashboardBoxes data={staticData[1]} />
       </div>
-      <div className="flex justify-between p-5">
+      <div className="flex flex-col md:flex-row justify-between p-5">
         <DashboardBoxes data={staticData[2]} />
         <DashboardBoxes data={staticData[3]} />
       </div>
-      <div className="flex justify-between p-4">
+      <div className="flex flex-col gap-4 md:flex-row justify-between p-4">
        {/* <TotalAmountCard /> */}
      <BarChartGraph />
      <Graph />

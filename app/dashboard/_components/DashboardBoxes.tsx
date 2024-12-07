@@ -18,7 +18,7 @@ interface DashboardBoxesProps {
 
 const DashboardBoxes: React.FC<DashboardBoxesProps> = ({ data }) => {
   return (
-    <div className="flex gap-8 w-[49%] h-56 items-center bg-white rounded-md p-6">
+    <div className="flex flex-col md:flex-row my-2 md:my-0 w-full gap-8 md:w-[49%] md:h-56 items-center bg-white rounded-md p-6">
       <Image
         className="w-48"
         src={data.image}

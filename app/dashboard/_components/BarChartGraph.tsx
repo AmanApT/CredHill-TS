@@ -53,7 +53,7 @@ const chartConfig = {
 
 export function BarChartGraph() {
   return (
-    <Card className="w-[30%]">
+    <Card className="w-full md:w-[30%]">
       <CardHeader>
         <CardTitle>Bar Chart - Mixed</CardTitle>
         <CardDescription>January - June 2024</CardDescription>

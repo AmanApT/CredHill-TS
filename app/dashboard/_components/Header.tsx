@@ -10,7 +10,7 @@ const Header = () => {
   return (
     <header className="bg-white">
       <div className="mx-auto max-w-screen-xl px-4 py-2 sm:px-2 sm:py-4 lg:px-8">
-        <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex md:flex-row flex-col  gap-4 justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
               Hi {user?.given_name}
@@ -39,7 +39,7 @@ const Header = () => {
               </div>
             </Link>
             <Link href="/profile">
-              <div className="inline-block rounded bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring">
+              <div className="inline-block rounded bg-orange-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-700 focus:outline-none focus:ring">
                 Profile
               </div>
             </Link>

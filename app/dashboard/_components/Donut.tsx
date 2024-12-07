@@ -58,7 +58,7 @@ export function Donut() {
   }, [])
 
   return (
-    <Card className="flex flex-col w-[28%]">
+    <Card className="flex flex-col w-full  md:w-[28%]">
       <CardHeader className="items-center pb-0">
         <CardTitle>Pie Chart - Donut with Text</CardTitle>
         <CardDescription>January - June 2024</CardDescription>

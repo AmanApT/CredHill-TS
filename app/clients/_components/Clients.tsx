@@ -46,7 +46,7 @@ const Clients = () => {
         {clients?.map((eachClient, id) => (
           <div
             key={id}
-            className="relative w-[48%] border-gray-200 p-8 shadow-xl transition hover:border-orange-500/10 hover:shadow-orange-500/10 bg-white rounded-lg border sm:p-6 lg:p-8"
+            className="relative w-full md:w-[48%] border-gray-200 p-8 shadow-xl transition hover:border-orange-500/10 hover:shadow-orange-500/10 bg-white rounded-lg border sm:p-6 lg:p-8"
           >
             <span className="absolute inset-x-0 bottom-0 h-2 bg-gradient-to-r from-orange-300 via-orange-500 to-purple-600"></span>
 
