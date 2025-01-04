@@ -66,4 +66,13 @@ export const updateInvoice = mutation({
    })
   },
 });
-
+export const deleteInvoice = mutation({
+  args: {
+    _id: v.id("invoice"), // The ID of the item to delete
+  },
+  handler: async (ctx, args) => {
+    // Delete the invoice from the "invoice" collection using the provided ID
+    await ctx.db.delete(args._id);
+    return { success: true, message: "Invoice deleted successfully" };
+  },
+});

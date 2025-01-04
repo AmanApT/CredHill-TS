@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useInvoiceContext } from "@/contexts/InvoiceContexts";
@@ -6,6 +7,7 @@ import moment from "moment";
 import Link from "next/link";
 // import Link from "next/link";
 import React from "react";
+import DeleteInvoice from "./DeleteInvoice";
 
 const InvoiceList = () => {
   const { invoices } = useInvoiceContext();
@@ -85,10 +87,14 @@ const InvoiceList = () => {
                   <td className="px-6 py-4">
                     {moment(eachInvoice?._creationTime).format("DD MMMM YYYY")}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 flex items-center gap-4">
                     <Link href={`create_invoice/${eachInvoice?._id}`}>
                       <Button className="p-3">Edit/View</Button>
                     </Link>
+                  
+                    <DeleteInvoice invoiceId={eachInvoice?._id} />
+              
+                  
                   </td>
                 </tr>
               );
