@@ -6,11 +6,23 @@ import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import moment from "moment";
 import Link from "next/link";
 // import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import DeleteInvoice from "./DeleteInvoice";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const InvoiceList = () => {
+  const rowsPerPage = 4;
   const { invoices } = useInvoiceContext();
+  const [startIndex, setStartIndex] = useState(0);
+  const [endIndex, setEndIndex] = useState(rowsPerPage);
 
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg p-4">
@@ -65,43 +77,86 @@ const InvoiceList = () => {
             </th>
           </tr>
         </thead>
+
         {invoices?.length != 0 && (
-          <tbody>
-            {invoices?.map((eachInvoice) => {
-              return (
-                <tr
-                  key={eachInvoice?._creationTime}
-                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-                >
-                  <th
-                    scope="row"
-                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+          <>
+            <tbody>
+              {invoices?.slice(startIndex, endIndex)?.map((eachInvoice) => {
+                return (
+                  <tr
+                    key={eachInvoice?._creationTime}
+                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
-                    {eachInvoice?.invoiceNo}
-                  </th>
-                  <td className="px-6 py-4">
-                    {moment(eachInvoice?.date).format("DD MMMM, YYYY")}
-                  </td>
-                  <td className="px-6 py-4">{eachInvoice?.totalAmount}</td>
-                  <td className="px-6 py-4">{eachInvoice?.tax}</td>
-                  <td className="px-6 py-4">
-                    {moment(eachInvoice?._creationTime).format("DD MMMM YYYY")}
-                  </td>
-                  <td className="px-6 py-4 flex items-center gap-4">
-                    <Link href={`create_invoice/${eachInvoice?._id}`}>
-                      <Button className="p-3">Edit/View</Button>
-                    </Link>
-                  
-                    <DeleteInvoice invoiceId={eachInvoice?._id} />
-              
-                  
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
+                    <th
+                      scope="row"
+                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    >
+                      {eachInvoice?.invoiceNo}
+                    </th>
+                    <td className="px-6 py-4">
+                      {moment(eachInvoice?.date).format("DD MMMM, YYYY")}
+                    </td>
+                    <td className="px-6 py-4">{eachInvoice?.totalAmount}</td>
+                    <td className="px-6 py-4">{eachInvoice?.tax}</td>
+                    <td className="px-6 py-4">
+                      {moment(eachInvoice?._creationTime).format(
+                        "DD MMMM YYYY"
+                      )}
+                    </td>
+                    <td className="px-6 py-4 flex items-center gap-4">
+                      <Link href={`create_invoice/${eachInvoice?._id}`}>
+                        <Button className="p-3">Edit/View</Button>
+                      </Link>
+
+                      <DeleteInvoice invoiceId={eachInvoice?._id} />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </>
         )}
       </table>
+      {invoices?.length != 0 && (
+        <div className="flex justify-center">
+        <Pagination className=" m-2 w-[95%]">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                className={
+                  startIndex === 0
+                    ? "pointer-events-none opacity-50"
+                    : undefined
+                }
+                onClick={() => {
+                  setStartIndex(startIndex - rowsPerPage);
+                  setEndIndex(endIndex - rowsPerPage);
+                }}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href="#">1</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                className={
+                  endIndex >= invoices?.length
+                    ? "pointer-events-none opacity-50"
+                    : undefined
+                }
+                onClick={() => {
+                  setStartIndex(startIndex + rowsPerPage);
+                  setEndIndex(endIndex + rowsPerPage);
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+        </div>
+      )}
       {invoices?.length == 0 && (
         <>
           {" "}
@@ -187,14 +242,10 @@ const InvoiceList = () => {
               <h2 className="text-center text-black text-xl font-semibold leading-loose pb-2">
                 There’s no Invoice here
               </h2>
-              <p className="text-center text-black text-base font-normal leading-relaxed pb-4">
-               
-              </p>
-              <Link href={'/create_invoice'}>
-              <Button className={`bg-orange-500 w-36`}>Create Invoice</Button>
+              <p className="text-center text-black text-base font-normal leading-relaxed pb-4"></p>
+              <Link href={"/create_invoice"}>
+                <Button className={`bg-orange-500 w-36`}>Create Invoice</Button>
               </Link>
-               
-             
             </div>
           </div>
         </>
