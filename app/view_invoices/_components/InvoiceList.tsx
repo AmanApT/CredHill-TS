@@ -6,7 +6,7 @@ import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import moment from "moment";
 import Link from "next/link";
 // import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DeleteInvoice from "./DeleteInvoice";
 import {
   Pagination,
@@ -19,11 +19,28 @@ import {
 } from "@/components/ui/pagination";
 
 const InvoiceList = () => {
-  const rowsPerPage = 4;
+  const rowsPerPage = 10;
   const { invoices } = useInvoiceContext();
+  const [localInvoices, setLocalInvoices] = useState(invoices);
+
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(rowsPerPage);
-
+  console.log(invoices)
+  const searchItem = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value.toLowerCase();
+    if (searchTerm === "") {
+      setLocalInvoices(invoices); // Reset to original list when search is cleared
+    } else {
+      const filtered = invoices.filter((eachInvoice) =>
+        eachInvoice?.invoiceNo?.toLowerCase().includes(searchTerm)
+      );
+      setLocalInvoices(filtered);
+    }
+  };
+  useEffect(() => {
+    setLocalInvoices(invoices);
+  }, [invoices]);
+    
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg p-4">
       <div className="pb-4 bg-white dark:bg-gray-900 ">
@@ -49,8 +66,10 @@ const InvoiceList = () => {
           <Input
             type="text"
             id="table-search"
+            onChange={(e)=>searchItem(e)}
             className="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search for items"
+
           />
         </div>
       </div>
@@ -81,7 +100,7 @@ const InvoiceList = () => {
         {invoices?.length != 0 && (
           <>
             <tbody>
-              {invoices?.slice(startIndex, endIndex)?.map((eachInvoice) => {
+              {localInvoices?.slice(startIndex, endIndex)?.map((eachInvoice) => {
                 return (
                   <tr
                     key={eachInvoice?._creationTime}
@@ -119,7 +138,7 @@ const InvoiceList = () => {
       </table>
       {invoices?.length != 0 && (
         <div className="flex justify-center">
-        <Pagination className=" m-2 w-[95%]">
+        <Pagination className=" m-2 w-[95%] cursor-pointer">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
