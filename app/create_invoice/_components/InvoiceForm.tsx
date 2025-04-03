@@ -336,10 +336,16 @@ const InvoiceForm: React.FC = () => {
             Invoice No <span className="text-red-600">*</span>{" "}
           </span>
           <input
-            type="number"
+            type="text"
+            value={"2025-26/"}
+            // onChange={(e) => handleInputChange(e, undefined, "invoiceNo")}
+            className="mt-1 border-0 border-b-[1.2px] block w-20 p-2 focus:outline-none"
+          />
+          <input
+            type="text"
             value={invoiceFormData.invoiceNo}
             onChange={(e) => handleInputChange(e, undefined, "invoiceNo")}
-            className="mt-1 border-0 border-b-[1.2px] block w-48 p-2 focus:outline-none"
+            className="mt-1 border-0 border-b-[1.2px] block w-32 p-2 pl-0 focus:outline-none"
           />
         </div>
         <div>

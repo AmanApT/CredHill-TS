@@ -181,7 +181,10 @@ const PreviewInvoice = () => {
           {invoiceFormData?.referredBy && <p>Order Reffered By</p>}
         </div>
         <div className="flex flex-col font-semibold gap-1">
-          <p>{invoiceFormData?.invoiceNo}</p>
+          <div className="flex ">
+            <p>2025-26/ {parseInt(invoiceFormData?.invoiceNo) <10 ? "00" : parseInt(invoiceFormData?.invoiceNo) >9 && parseInt(invoiceFormData?.invoiceNo) <100 ? "0": "" }</p>
+            <p>{invoiceFormData?.invoiceNo}</p>
+          </div>
           <p>
             {moment(invoiceFormData?.date).format("DD/MM/YYYY")}
             {/* {invoiceFormData?.date} */}
@@ -404,14 +407,15 @@ const PreviewInvoice = () => {
           <Link href={"/create_invoice"} className="no-print">
             <Button>
               <PencilIcon />
-              Edit</Button>
+              Edit
+            </Button>
           </Link>
           <Button onClick={printInvoice} className="no-print">
             <Printer />
             Print
           </Button>
           {params?.invoiceId === undefined ? (
-            <Button  onClick={saveInvoice} className="no-print bg-purple-600">
+            <Button onClick={saveInvoice} className="no-print bg-purple-600">
               <Save />
               Save Invoice
             </Button>
