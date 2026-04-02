@@ -182,7 +182,7 @@ const PreviewInvoice = () => {
         </div>
         <div className="flex flex-col font-semibold gap-1">
           <div className="flex ">
-            <p>2025-26/ {parseInt(invoiceFormData?.invoiceNo) <10 ? "00" : parseInt(invoiceFormData?.invoiceNo) >9 && parseInt(invoiceFormData?.invoiceNo) <100 ? "0": "" }</p>
+            <p>2026-27/ {parseInt(invoiceFormData?.invoiceNo) <10 ? "00" : parseInt(invoiceFormData?.invoiceNo) >9 && parseInt(invoiceFormData?.invoiceNo) <100 ? "0": "" }</p>
             <p>{invoiceFormData?.invoiceNo}</p>
           </div>
           <p>

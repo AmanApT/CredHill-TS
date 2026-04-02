@@ -337,7 +337,7 @@ const InvoiceForm: React.FC = () => {
           </span>
           <input
             type="text"
-            value={"2025-26/"}
+            value={"2026-27/"}
             // onChange={(e) => handleInputChange(e, undefined, "invoiceNo")}
             className="mt-1 border-0 border-b-[1.2px] block w-20 p-2 focus:outline-none"
           />
