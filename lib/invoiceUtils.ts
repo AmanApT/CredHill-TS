@@ -75,3 +75,30 @@ export function splitStoredInvoiceNo(stored: string): {
     numericStr: String(num).padStart(3, "0"),
   };
 }
+
+/**
+ * Returns payment status text and styling information.
+ * Used for badges in UI.
+ * @param isPaid - boolean: true = Payment Received, false = Pending
+ */
+export function getPaymentStatusInfo(isPaid: boolean): {
+  label: string;
+  badge: "green" | "yellow";
+  bgClass: string;
+  textClass: string;
+} {
+  if (isPaid) {
+    return {
+      label: "Payment Received",
+      badge: "green",
+      bgClass: "bg-green-100",
+      textClass: "text-green-800",
+    };
+  }
+  return {
+    label: "Pending",
+    badge: "yellow",
+    bgClass: "bg-yellow-100",
+    textClass: "text-yellow-800",
+  };
+}

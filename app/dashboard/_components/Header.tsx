@@ -9,13 +9,13 @@ const Header = () => {
 
   return (
     <header className="bg-white">
-      <div className="mx-auto max-w-screen-xl px-4 py-2 sm:px-2 sm:py-4 lg:px-8">
-        <div className="flex md:flex-row flex-col  gap-4 justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+      <div className=" flex items-center justify-between">
+        <div className="flex md:flex-row flex-col items-center w-full p-2 justify-between">
+     
+            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
               Hi {user?.given_name}
             </h1>
-          </div>
+      
 
           <div className="flex items-center gap-4">
             <Link href="/create_invoice">

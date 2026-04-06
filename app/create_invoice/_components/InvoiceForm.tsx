@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TableRow, useInvoiceContext } from "@/contexts/InvoiceContexts";
-import { getIndianFY, parseInvoiceNo, formatInvoiceNo } from "@/lib/invoiceUtils";
+import { getIndianFY, parseInvoiceNo, formatInvoiceNo, getPaymentStatusInfo } from "@/lib/invoiceUtils";
 import {
   Select,
   SelectContent,
@@ -20,12 +20,6 @@ import { MdAdd, MdAddBox, MdDelete } from "react-icons/md";
 import { Input } from "@/components/ui/input";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import {
   Command,
@@ -95,6 +89,7 @@ const InvoiceForm: React.FC = () => {
         referredBy: foundInvoice?.ref,
         date: foundInvoice?.date,
         approvalId: foundInvoice?.approvalId,
+        invoiceStatus: foundInvoice?.invoiceStatus ?? false,
       });
       const clientId = foundInvoice?.clientId;
       console.log(clientId, "clientId");
@@ -641,28 +636,13 @@ const InvoiceForm: React.FC = () => {
                           aria-expanded={openStates[index] || false}
                           className="w-[200px] justify-between text-ellipsis overflow-hidden whitespace-nowrap"
                         >
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                {row.item
-                                  ? items.find(
-                                      (item) => item.itemName === row.item
-                                    )?.itemName || "Choose Items"
-                                  : "Choose Items"}
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>
-                                  {row.item
-                                    ? ` ${
-                                        items.find(
-                                          (item) => item.itemName === row.item
-                                        )?.itemName || "Choose Items"
-                                      }`
-                                    : "Please select an item"}
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                          <span className="truncate">
+                            {row.item
+                              ? items.find(
+                                  (item) => item.itemName === row.item
+                                )?.itemName || "Choose Items"
+                              : "Choose Items"}
+                          </span>
 
                           <ChevronsUpDown className="opacity-50" />
                         </Button>
@@ -804,6 +784,32 @@ const InvoiceForm: React.FC = () => {
               />
             </button>
           </div>
+          {params?.invoiceId !== undefined && (
+            <div className="flex items-center gap-4 my-4 p-3 bg-slate-50 rounded-md">
+              <span className="font-semibold">Payment Status:</span>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  invoiceFormData.invoiceStatus
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {invoiceFormData.invoiceStatus ? "✓ Payment Received" : "⏳ Pending"}
+              </span>
+              <Button
+                onClick={() =>
+                  setInvoiceFormData((prev) => ({
+                    ...prev,
+                    invoiceStatus: !prev.invoiceStatus,
+                  }))
+                }
+                variant="outline"
+                size="sm"
+              >
+                {invoiceFormData.invoiceStatus ? "Mark as Incomplete" : "Mark as Completed"}
+              </Button>
+            </div>
+          )}
         </div>
         {/* <div className="flex flex-col ">
           <div>

@@ -8,6 +8,7 @@ import Link from "next/link";
 // import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import DeleteInvoice from "./DeleteInvoice";
+import { getPaymentStatusInfo } from "@/lib/invoiceUtils";
 import {
   Pagination,
   PaginationContent,
@@ -22,28 +23,70 @@ const InvoiceList = () => {
   const rowsPerPage = 10;
   const { invoices } = useInvoiceContext();
   const [localInvoices, setLocalInvoices] = useState(invoices);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState<"all" | "paid" | "pending">("all");
 
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(rowsPerPage);
   console.log(invoices)
+
   const searchItem = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value.toLowerCase();
-    if (searchTerm === "") {
-      setLocalInvoices(invoices); // Reset to original list when search is cleared
-    } else {
-      const filtered = invoices.filter((eachInvoice) =>
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+  };
+
+  // Combined search and filter logic
+  useEffect(() => {
+    let filtered = invoices || [];
+
+    // Apply search filter
+    if (searchTerm !== "") {
+      filtered = filtered.filter((eachInvoice) =>
         eachInvoice?.invoiceNo?.toLowerCase().includes(searchTerm)
       );
-      setLocalInvoices(filtered);
     }
-  };
-  useEffect(() => {
-    setLocalInvoices(invoices);
-  }, [invoices]);
+
+    // Apply payment status filter
+    if (paymentStatusFilter === "paid") {
+      filtered = filtered.filter((eachInvoice) => eachInvoice?.invoiceStatus === true);
+    } else if (paymentStatusFilter === "pending") {
+      filtered = filtered.filter((eachInvoice) => eachInvoice?.invoiceStatus === false);
+    }
+
+    setLocalInvoices(filtered);
+  }, [invoices, searchTerm, paymentStatusFilter]);
     
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg p-4">
       <div className="pb-4 bg-white dark:bg-gray-900 ">
+        {/* Payment Status Filter */}
+        <div className="flex gap-2 mb-4">
+          <span className="text-sm font-semibold text-gray-700 flex items-center">Filter by Status:</span>
+          <Button
+            onClick={() => setPaymentStatusFilter("all")}
+            variant={paymentStatusFilter === "all" ? "default" : "outline"}
+            size="sm"
+          >
+            All
+          </Button>
+          <Button
+            onClick={() => setPaymentStatusFilter("pending")}
+            variant={paymentStatusFilter === "pending" ? "default" : "outline"}
+            size="sm"
+            className={paymentStatusFilter === "pending" ? "bg-yellow-600" : ""}
+          >
+            ⏳ Pending
+          </Button>
+          <Button
+            onClick={() => setPaymentStatusFilter("paid")}
+            variant={paymentStatusFilter === "paid" ? "default" : "outline"}
+            size="sm"
+            className={paymentStatusFilter === "paid" ? "bg-green-600" : ""}
+          >
+            ✓ Paid
+          </Button>
+        </div>
+
         <label className="sr-only">Search</label>
         <div className="relative mt-1">
           <div className="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -92,6 +135,9 @@ const InvoiceList = () => {
               Updated At
             </th>
             <th scope="col" className="px-6 py-3">
+              Payment Status
+            </th>
+            <th scope="col" className="px-6 py-3">
               Actions
             </th>
           </tr>
@@ -121,6 +167,19 @@ const InvoiceList = () => {
                       {moment(eachInvoice?._creationTime).format(
                         "DD MMMM YYYY"
                       )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          eachInvoice?.invoiceStatus
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {eachInvoice?.invoiceStatus
+                          ? "✓ Payment Received"
+                          : "⏳ Pending"}
+                      </span>
                     </td>
                     <td className="px-6 py-4 flex items-center gap-4">
                       <Link href={`create_invoice/${eachInvoice?._id}`}>

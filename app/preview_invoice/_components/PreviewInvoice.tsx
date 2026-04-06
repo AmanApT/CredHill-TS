@@ -7,6 +7,7 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useMutation } from "convex/react";
 import Image from "next/image";
 import moment from "moment";
+import { getPaymentStatusInfo } from "@/lib/invoiceUtils";
 
 import { useParams } from "next/navigation";
 
@@ -21,6 +22,7 @@ const PreviewInvoice = () => {
 
   const {
     invoiceFormData,
+    setInvoiceFormData,
     companyDetails,
     tableRows,
     includeBankDetails,
@@ -140,7 +142,7 @@ const PreviewInvoice = () => {
         clientId: companyDetails?.billedTo?._id,
         totalAmount: total.toString(),
         tax: (cgst + sgst + igst).toString(),
-        invoiceStatus: false,
+        invoiceStatus: invoiceFormData?.invoiceStatus ?? false,
         item: JSON.stringify(tableRows),
       });
       setIsSaved(true);
@@ -170,7 +172,7 @@ const PreviewInvoice = () => {
         clientId: companyDetails?.billedTo?._id,
         totalAmount: total.toString(),
         tax: (cgst + sgst + igst).toString(),
-        invoiceStatus: false,
+        invoiceStatus: invoiceFormData?.invoiceStatus ?? false,
         item: JSON.stringify(tableRows),
       });
 
@@ -207,6 +209,36 @@ const PreviewInvoice = () => {
           {invoiceFormData?.referredBy && <p>{invoiceFormData?.referredBy}</p>}
         </div>
       </div>
+
+      {/* Payment Status Section */}
+      <div className="flex items-center gap-4 my-4 p-3 bg-slate-50 rounded-md no-print">
+        <span className="font-semibold text-gray-700">Payment Status:</span>
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-medium ${
+            invoiceFormData?.invoiceStatus
+              ? "bg-green-100 text-green-800"
+              : "bg-yellow-100 text-yellow-800"
+          }`}
+        >
+          {invoiceFormData?.invoiceStatus ? "✓ Payment Received" : "⏳ Pending"}
+        </span>
+        <Button
+          onClick={() =>
+            setInvoiceFormData((prev) => ({
+              ...prev,
+              invoiceStatus: !prev.invoiceStatus,
+            }))
+          }
+          variant="outline"
+          size="sm"
+          className="no-print"
+        >
+          {invoiceFormData?.invoiceStatus
+            ? "Mark as Incomplete"
+            : "Mark as Completed"}
+        </Button>
+      </div>
+
       <section className="flex gap-4 mt-3 justify-between">
         <div className="flex w-[45vw] text-xs flex-col rounded-md p-3 bg-[#efebf8]">
           <p className="text-[#6538BF] text-base">Billed By</p>

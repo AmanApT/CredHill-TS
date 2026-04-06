@@ -4,6 +4,9 @@ import "./globals.css";
 import { InvoiceProvider } from "@/contexts/InvoiceContexts";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { RootLayoutContent } from "./_components/RootLayoutContent";
+import { SidebarProvider } from "@/contexts/SidebarContext";
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -27,17 +30,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ConvexClientProvider>
           <InvoiceProvider>
-
-          {children}
+            <SidebarProvider>
+              <RootLayoutContent>{children}</RootLayoutContent>
+            </SidebarProvider>
           </InvoiceProvider>
-          
-          </ConvexClientProvider>
-          <Toaster />
+        </ConvexClientProvider>
+        <Toaster />
       </body>
     </html>
   );

@@ -44,6 +44,7 @@ export interface InvoiceFormData {
   referredBy: string;
   date: string;
   approvalId: string;
+  invoiceStatus: boolean;
 }
 
 export interface AccountInfo {
@@ -80,6 +81,7 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
     referredBy: "",
     date: new Date().toISOString().split("T")[0],
     approvalId: "",
+    invoiceStatus: false,
   });
 
   const [invoices, setInvoices] = useState<[]>();

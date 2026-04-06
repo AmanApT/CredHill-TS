@@ -1,60 +1,48 @@
 "use client";
-import React, { useEffect,  } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "./_components/Header";
 
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useConvex, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-// import ApexChart from "./_components/ApexChart";
 
-import DashboardBoxes from "./_components/DashboardBoxes";
 
-import hero from "@/assets/hero.png";
-import client from "@/assets/client.jpg";
-import invoicesImage from "@/assets/invoices.jpg";
-import inventory from "@/assets/inventory.jpg";
-// import TotalAmountCard from "./_components/TotalAmountCard";
-import { Donut } from "./_components/Donut";
-import { Graph } from "./_components/Graph";
-import { BarChartGraph } from "./_components/BarChartGraph";
+
+import { InvoiceSummaryCards } from "./_components/InvoiceSummaryCards";
+import { ClientWiseInvoicesChart } from "./_components/ClientWiseInvoicesChart";
+import { PendingInvoicesByClientChart } from "./_components/PendingInvoicesByClientChart";
+import { RecentInvoices } from "./_components/RecentInvoices";
+import { DateRangeFilter } from "./_components/DateRangeFilter";
 import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import { usePathname } from 'next/navigation'
+import { getDateRange, FilterType, DateRange } from "@/lib/dateUtils";
+import { Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 const Dashboard = () => {
-  const pathname = usePathname()
-  const staticData = [
-    {
-      title: "Create Polished Invoices Effortlessly",
-      desc: "Effeciently identify your client needs and cater your invoices accordingly",
-      cta: "Create Invoice",
-      ctaColor: "green",
-      href: "/create_invoice",
-      image: hero,
-    },
-    {
-      title: "Manage Clients Effeciently",
-      desc: "Client Management tool lets you create/update client details",
-      cta: "Manage Clients",
-      ctaColor: "orange",
-      href: "/clients",
-      image: client,
-    },
-    {
-      title: "View and Manage Invoices",
-      desc: "Manage, edit and check status of your invoices",
-      cta: "Manage Invoices",
-      ctaColor: "red",
-      href: "/view_invoices",
-      image: invoicesImage,
-    },
-    {
-      title: "Item Master",
-      desc: "Inventory Management at your fingertips!!",
-      cta: "Go to Inventory",
-      ctaColor: "green",
-      href: "/item_master",
-      image: inventory,
-    },
-  ];
+  const pathname = usePathname();
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>("month");
+  const [customStartDate, setCustomStartDate] = useState<string>();
+  const [customEndDate, setCustomEndDate] = useState<string>();
+  const [dateRange, setDateRange] = useState<DateRange>(getDateRange("month"));
+  const [showDateFilter, setShowDateFilter] = useState(false);
+
+  const handleFilterChange = (filterType: FilterType, customStart?: string, customEnd?: string) => {
+    setSelectedFilter(filterType);
+    if (filterType === "custom" && customStart && customEnd) {
+      setCustomStartDate(customStart);
+      setCustomEndDate(customEnd);
+      const startDate = new Date(customStart);
+      const endDate = new Date(customEnd);
+      setDateRange({ startDate, endDate });
+    } else {
+      setCustomStartDate(undefined);
+      setCustomEndDate(undefined);
+      setDateRange(getDateRange(filterType));
+    }
+  };
+
+
   const {setInvoiceFormData,setCompanyDetails,setTableRows} = useInvoiceContext();
 
   useEffect(() => {
@@ -171,32 +159,55 @@ const Dashboard = () => {
   }, [user]);
 
   return (
-    <section className="bg-slate-100 ">
+    <section className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Header />
-      {/* <div className="p-5 flex gap-4 ">
-        <Link href="/clients">
-          <Button>Manage Clients</Button>
-        </Link>
-        <Link href="/item_master">
-          <Button className="bg-red-400">Item Master</Button>
-        </Link>
-      </div> */}
-      <div className="flex flex-col md:flex-row justify-between p-5">
-        <DashboardBoxes data={staticData[0]} />
-        <DashboardBoxes data={staticData[1]} />
-      </div>
-      <div className="flex flex-col md:flex-row justify-between p-5">
-        <DashboardBoxes data={staticData[2]} />
-        <DashboardBoxes data={staticData[3]} />
-      </div>
-      <div className="flex flex-col gap-4 md:flex-row justify-between p-4">
-       {/* <TotalAmountCard /> */}
-     <BarChartGraph />
-     <Graph />
-     <Donut />
-      </div>
 
-      {/* <Invoices invoices = {invoices} /> */}
+      {/* Main Dashboard Container */}
+      <div className="p-4">
+        {/* Summary Cards - Top */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">Invoice Summary</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDateFilter(!showDateFilter)}
+              className="gap-2"
+              title={showDateFilter ? "Hide filter" : "Show filter"}
+            >
+              <Calendar className="h-4 w-4" />
+              {showDateFilter ? "Hide" : "Filter"}
+            </Button>
+          </div>
+
+          {/* Date Range Filter - Toggleable (Below Heading) */}
+          {showDateFilter && (
+            <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+              <DateRangeFilter
+                selectedFilter={selectedFilter}
+                customStartDate={customStartDate}
+                customEndDate={customEndDate}
+                onFilterChange={handleFilterChange}
+              />
+            </div>
+          )}
+
+          {/* Summary Cards */}
+          <InvoiceSummaryCards dateRange={dateRange} />
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <ClientWiseInvoicesChart dateRange={dateRange} />
+          <PendingInvoicesByClientChart dateRange={dateRange} />
+        </div>
+
+        {/* Recent Invoices */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+          <RecentInvoices dateRange={dateRange} />
+        </div>
+      </div>
     </section>
   );
 };
