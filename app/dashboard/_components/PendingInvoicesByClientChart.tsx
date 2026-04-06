@@ -71,14 +71,29 @@ export function PendingInvoicesByClientChart({ dateRange }: PendingInvoicesByCli
       });
 
       // Convert to array and sort
-      const chartData: PendingData[] = Object.entries(clientPendingCounts)
+      const sortedChartData: PendingData[] = Object.entries(clientPendingCounts)
         .map(([clientName, pendingInvoices]) => ({
           clientName,
           pendingInvoices,
         }))
         .sort((a, b) => b.pendingInvoices - a.pendingInvoices);
 
-      setPendingData(chartData);
+      // Limit to top 10 clients and group rest as "Others"
+      const top10 = sortedChartData.slice(0, 10);
+      const remaining = sortedChartData.slice(10);
+
+      let finalData = [...top10];
+
+      // If there are more than 10 clients, add "Others"
+      if (remaining.length > 0) {
+        const othersTotal = remaining.reduce((sum, item) => sum + item.pendingInvoices, 0);
+        finalData.push({
+          clientName: `Others (${remaining.length} clients)`,
+          pendingInvoices: othersTotal,
+        });
+      }
+
+      setPendingData(finalData);
     }
   }, [invoices, allClients, dateRange]);
 
@@ -102,7 +117,7 @@ export function PendingInvoicesByClientChart({ dateRange }: PendingInvoicesByCli
     <Card className="w-full border-0 shadow-md">
       <CardHeader>
         <CardTitle>Pending Invoices by Client</CardTitle>
-        <CardDescription>Number of unpaid invoices per client</CardDescription>
+        <CardDescription>Number of unpaid invoices per client (Top 10 + Others)</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

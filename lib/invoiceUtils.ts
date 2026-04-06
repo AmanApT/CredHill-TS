@@ -102,3 +102,43 @@ export function getPaymentStatusInfo(isPaid: boolean): {
     textClass: "text-yellow-800",
   };
 }
+
+/**
+ * Formats a number in Indian numbering system with commas.
+ * Example: 1234567.89 → "12,34,567.89"
+ * Example: 226562.36 → "2,26,562.36"
+ *
+ * @param num - number or string to format
+ * @param decimalPlaces - number of decimal places to show (default 2)
+ */
+export function formatIndianNumber(num: number | string, decimalPlaces: number = 2): string {
+  // Convert to number if string
+  const number = typeof num === "string" ? parseFloat(num) : num;
+
+  if (isNaN(number)) return "0.00";
+
+  // Split into integer and decimal parts
+  const parts = number.toFixed(decimalPlaces).split(".");
+  const integerPart = parts[0];
+  const decimalPart = parts[1];
+
+  // Format integer part with Indian commas
+  let formattedInteger = "";
+
+  // Last 3 digits
+  formattedInteger = integerPart.slice(-3);
+
+  // Add commas for every 2 digits before the last 3
+  let remaining = integerPart.slice(0, -3);
+  while (remaining.length > 0) {
+    const chunk = remaining.slice(-2);
+    formattedInteger = chunk + "," + formattedInteger;
+    remaining = remaining.slice(0, -2);
+  }
+
+  // Remove leading comma if exists
+  formattedInteger = formattedInteger.replace(/^,/, "");
+
+  // Combine with decimal part
+  return `${formattedInteger}.${decimalPart}`;
+}

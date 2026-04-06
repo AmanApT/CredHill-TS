@@ -6,6 +6,7 @@ import moment from "moment";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { filterInvoicesByDateRange, DateRange } from "@/lib/dateUtils";
+import { formatIndianNumber } from "@/lib/invoiceUtils";
 
 interface RecentInvoicesProps {
   dateRange: DateRange;
@@ -46,7 +47,7 @@ export function RecentInvoices({ dateRange }: RecentInvoicesProps) {
                   </p>
                 </div>
                 <div className="text-right mr-4">
-                  <p className="font-semibold text-gray-900">₹{invoice.totalAmount}</p>
+                  <p className="font-semibold text-gray-900">₹{formatIndianNumber(invoice.totalAmount)}</p>
                   <p
                     className={`text-xs font-medium ${
                       invoice.invoiceStatus

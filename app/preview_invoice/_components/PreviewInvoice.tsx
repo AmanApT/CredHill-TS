@@ -7,7 +7,7 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useMutation } from "convex/react";
 import Image from "next/image";
 import moment from "moment";
-import { getPaymentStatusInfo } from "@/lib/invoiceUtils";
+import { getPaymentStatusInfo, formatIndianNumber } from "@/lib/invoiceUtils";
 
 import { useParams } from "next/navigation";
 
@@ -352,19 +352,19 @@ const PreviewInvoice = () => {
                   {row.description}
                 </td>
                 <td className="">{row.quantity}</td>
-                <td>{row.rate}</td>
-                <td>{row.amount}</td>
+                <td>{formatIndianNumber(row.rate)}</td>
+                <td>{formatIndianNumber(row.amount)}</td>
                 {companyDetails?.billedTo?.gst?.substring(0, 2) == "07" ? (
                   <>
                     {" "}
-                    <td className="">{row.cgst}</td>
-                    <td className="">{row.sgst}</td>
+                    <td className="">{formatIndianNumber(row.cgst)}</td>
+                    <td className="">{formatIndianNumber(row.sgst)}</td>
                   </>
                 ) : (
-                  <td>{row.igst}</td>
+                  <td>{formatIndianNumber(row.igst)}</td>
                 )}
 
-                <td>{row.total}</td>
+                <td>{formatIndianNumber(row.total)}</td>
               </tr>
             ))}
           </tbody>
@@ -412,21 +412,21 @@ const PreviewInvoice = () => {
                 )}
               </div>
               <div className="flex flex-col gap-2 text-right">
-                <p>₹{amount.toFixed(2)}</p>
+                <p>₹{formatIndianNumber(amount)}</p>
                 {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
                   <>
-                    <p>₹{cgst.toFixed(2)} </p>
-                    <p>₹{sgst.toFixed(2)}</p>
+                    <p>₹{formatIndianNumber(cgst)} </p>
+                    <p>₹{formatIndianNumber(sgst)}</p>
                   </>
                 ) : (
-                  <p>₹ {igst.toFixed(2)}</p>
+                  <p>₹ {formatIndianNumber(igst)}</p>
                 )}
               </div>
             </div>
             <hr className="mt-4 border border-black" />
             <div className="py-1 flex text-base justify-between font-bold">
               <span>Total (INR)</span>
-              <span>₹ {total.toFixed(2)}</span>
+              <span>₹ {formatIndianNumber(total)}</span>
             </div>
             <hr className="border border-black" />
             <div>

@@ -32,8 +32,8 @@ export function RootLayoutContent({ children }: RootLayoutContentProps) {
       {shouldShowSidebar && <Sidebar />}
 
       {/* Main Content */}
-      <main className={`flex-1 transition-all duration-300 ${marginClass}`}>
-        <div className="w-full">{children}</div>
+      <main className={`flex-1 transition-all duration-300 overflow-x-hidden ${marginClass}`}>
+        <div className="w-full max-w-full">{children}</div>
       </main>
     </div>
   );

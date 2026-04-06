@@ -4,6 +4,7 @@ import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, CheckCircle, DollarSign, AlertCircle, TrendingUp } from "lucide-react";
 import { filterInvoicesByDateRange, DateRange, getDateRange } from "@/lib/dateUtils";
+import { formatIndianNumber } from "@/lib/invoiceUtils";
 
 interface InvoiceSummaryCardsProps {
   dateRange: DateRange;
@@ -95,7 +96,7 @@ export function InvoiceSummaryCards({ dateRange }: InvoiceSummaryCardsProps) {
     },
     {
       title: "Payment Received",
-      value: `₹${paymentReceived.toFixed(2)}`,
+      value: `₹${formatIndianNumber(paymentReceived)}`,
       icon: CheckCircle,
       color: "text-green-600",
       bgColor: "bg-green-50",
@@ -103,7 +104,7 @@ export function InvoiceSummaryCards({ dateRange }: InvoiceSummaryCardsProps) {
     },
     {
       title: "Total Revenue",
-      value: `₹${totalRevenue.toFixed(2)}`,
+      value: `₹${formatIndianNumber(totalRevenue)}`,
       icon: DollarSign,
       color: "text-purple-600",
       bgColor: "bg-purple-50",
@@ -111,7 +112,7 @@ export function InvoiceSummaryCards({ dateRange }: InvoiceSummaryCardsProps) {
     },
     {
       title: "Total Tax",
-      value: `₹${totalTax.toFixed(2)}`,
+      value: `₹${formatIndianNumber(totalTax)}`,
       icon: DollarSign,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
@@ -119,7 +120,7 @@ export function InvoiceSummaryCards({ dateRange }: InvoiceSummaryCardsProps) {
     },
     {
       title: "Pending Payment",
-      value: `₹${pendingPayment.toFixed(2)}`,
+      value: `₹${formatIndianNumber(pendingPayment)}`,
       icon: AlertCircle,
       color: "text-red-600",
       bgColor: "bg-red-50",

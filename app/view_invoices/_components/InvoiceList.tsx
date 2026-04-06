@@ -8,7 +8,7 @@ import Link from "next/link";
 // import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import DeleteInvoice from "./DeleteInvoice";
-import { getPaymentStatusInfo } from "@/lib/invoiceUtils";
+import { getPaymentStatusInfo, formatIndianNumber } from "@/lib/invoiceUtils";
 import {
   Pagination,
   PaginationContent,
@@ -161,8 +161,8 @@ const InvoiceList = () => {
                     <td className="px-6 py-4">
                       {moment(eachInvoice?.date).format("DD MMMM, YYYY")}
                     </td>
-                    <td className="px-6 py-4">{eachInvoice?.totalAmount}</td>
-                    <td className="px-6 py-4">{eachInvoice?.tax}</td>
+                    <td className="px-6 py-4">₹{formatIndianNumber(eachInvoice?.totalAmount)}</td>
+                    <td className="px-6 py-4">₹{formatIndianNumber(eachInvoice?.tax)}</td>
                     <td className="px-6 py-4">
                       {moment(eachInvoice?._creationTime).format(
                         "DD MMMM YYYY"

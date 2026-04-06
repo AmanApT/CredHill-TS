@@ -355,7 +355,7 @@ const InvoiceForm: React.FC = () => {
     setInvoiceFormData({ ...invoiceFormData, [field]: e.target.value });
   };
   return (
-    <div className="m-4 p-6 w-full mx-auto bg-white shadow-lg rounded-md ">
+    <div className="m-4 p-6  mx-auto bg-white shadow-lg rounded-md ">
       <div className="space-y-2">
         <div className="flex items-center">
           <span className="w-32 ">

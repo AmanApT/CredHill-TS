@@ -1,11 +1,17 @@
-// 'use client'
-// import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
+'use client'
 import Link from "next/link";
-// import { useRouter } from 'next/router';
+import { useParams } from 'next/navigation';
 import React from "react";
+import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 
 const Header = () => {
-  // const {user} = useKindeBrowserClient();
+  const params = useParams();
+  const { invoiceFormData } = useInvoiceContext();
+
+  const isEditMode = params?.invoiceId !== undefined;
+  const headerTitle = isEditMode
+    ? `Preview Invoice: ${invoiceFormData?.invoiceNo || "Loading..."}`
+    : "Create New Invoice";
 
   return (
     <header className="bg-white">
@@ -13,8 +19,7 @@ const Header = () => {
         <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
-              {" "}
-              Create New Invoice
+              {headerTitle}
             </h1>
           </div>
 
