@@ -29,10 +29,12 @@ export const addInvoice = mutation({
     item: v.string(),
   },
   handler: async (ctx, args) => {
-    // Uniqueness check: ensure invoice number doesn't already exist
+    // Uniqueness check: ensure invoice number doesn't already exist for this user
     const existing = await ctx.db
       .query("invoice")
-      .withIndex("by_invoiceNo", (q) => q.eq("invoiceNo", args.invoiceNo))
+      .withIndex("by_billedBy_invoiceNo", (q) =>
+        q.eq("billedBy", args.billedBy).eq("invoiceNo", args.invoiceNo)
+      )
       .first();
 
     if (existing !== null) {

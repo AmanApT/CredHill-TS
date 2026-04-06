@@ -16,5 +16,6 @@ export default defineSchema({
     item: v.string(),
   })
     .index("by_invoiceNo", ["invoiceNo"])
-    .index("by_billedBy", ["billedBy"]),
+    .index("by_billedBy", ["billedBy"])
+    .index("by_billedBy_invoiceNo", ["billedBy", "invoiceNo"]),
 });
