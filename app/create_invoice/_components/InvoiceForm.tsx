@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TableRow, useInvoiceContext } from "@/contexts/InvoiceContexts";
+import { getIndianFY, parseInvoiceNo, formatInvoiceNo } from "@/lib/invoiceUtils";
 import {
   Select,
   SelectContent,
@@ -242,18 +243,42 @@ const InvoiceForm: React.FC = () => {
     );
   };
   useEffect(() => {
+    // Only auto-increment in create mode, not in edit mode
+    if (params?.invoiceId !== undefined) return;
+
     if (invoices !== undefined) {
       const sortedInvoices = [...invoices].sort(
         (a, b) => b._creationTime - a._creationTime
       );
 
-      const mostRecentInvoice = sortedInvoices[0]?.invoiceNo;
-      setInvoiceFormData({
-        ...invoiceFormData,
-        invoiceNo: (parseInt(mostRecentInvoice) + 1).toString(),
-      });
+      const mostRecentStored = sortedInvoices[0]?.invoiceNo;
+      const currentFY = getIndianFY();
+
+      let nextNum = 1;
+
+      // Check if the last invoice exists and is in a different FY
+      if (mostRecentStored) {
+        const lastNum = parseInvoiceNo(mostRecentStored);
+
+        // Extract the FY from the stored invoice number
+        const lastInvoiceFY = mostRecentStored.includes("/")
+          ? mostRecentStored.split("/")[0]
+          : null;
+
+        // If the FY is the same, increment normally
+        if (lastInvoiceFY === currentFY) {
+          nextNum = lastNum + 1;
+        }
+        // If the FY changed, reset to 1 (handled above)
+      }
+
+      // Store only the zero-padded numeric portion in state for create mode
+      setInvoiceFormData((prev) => ({
+        ...prev,
+        invoiceNo: String(nextNum).padStart(3, "0"),
+      }));
     }
-  }, [invoices]);
+  }, [invoices, params?.invoiceId]);
   const previewInvoice = () => {
     if (invoiceFormData?.invoiceNo === "") {
       toast("Invoice number can't be empty!", {
@@ -276,7 +301,13 @@ const InvoiceForm: React.FC = () => {
       return;
     }
 
+    // In create mode, construct the full formatted invoiceNo before navigating to preview
     if (params?.invoiceId === undefined) {
+      const fullInvoiceNo = formatInvoiceNo(
+        getIndianFY(),
+        parseInt(invoiceFormData.invoiceNo, 10)
+      );
+      setInvoiceFormData((prev) => ({ ...prev, invoiceNo: fullInvoiceNo }));
       router.push("/preview_invoice");
     } else {
       router.push(`/update_invoice/${params?.invoiceId}`);
@@ -335,18 +366,26 @@ const InvoiceForm: React.FC = () => {
           <span className="w-32 ">
             Invoice No <span className="text-red-600">*</span>{" "}
           </span>
-          <input
-            type="text"
-            value={"2026-27/"}
-            // onChange={(e) => handleInputChange(e, undefined, "invoiceNo")}
-            className="mt-1 border-0 border-b-[1.2px] block w-20 p-2 focus:outline-none"
-          />
-          <input
-            type="text"
-            value={invoiceFormData.invoiceNo}
-            onChange={(e) => handleInputChange(e, undefined, "invoiceNo")}
-            className="mt-1 border-0 border-b-[1.2px] block w-32 p-2 pl-0 focus:outline-none"
-          />
+          {params?.invoiceId !== undefined ? (
+            // Edit mode: show full stored invoice number as read-only
+            <span className="mt-1 border-0 border-b-[1.2px] block p-2 min-w-[8rem] text-gray-700">
+              {invoiceFormData.invoiceNo}
+            </span>
+          ) : (
+            // Create mode: dynamic FY prefix (read-only) + editable numeric suffix
+            <>
+              <span className="mt-1 border-0 border-b-[1.2px] block p-2 text-gray-700 select-none">
+                {getIndianFY()}/
+              </span>
+              <input
+                type="text"
+                value={invoiceFormData.invoiceNo}
+                onChange={(e) => handleInputChange(e, undefined, "invoiceNo")}
+                className="mt-1 border-0 border-b-[1.2px] block w-32 p-2 pl-0 focus:outline-none"
+                placeholder="001"
+              />
+            </>
+          )}
         </div>
         <div>
           <div className="flex items-center">

@@ -10,13 +10,15 @@ import moment from "moment";
 
 import { useParams } from "next/navigation";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
 import Link from "next/link";
 import { PencilIcon, Printer, Save } from "lucide-react";
 
 const PreviewInvoice = () => {
+  const [isSaved, setIsSaved] = useState(false);
+
   const {
     invoiceFormData,
     companyDetails,
@@ -127,22 +129,28 @@ const PreviewInvoice = () => {
 
   const { amount, cgst, sgst, total, igst } = calculateTotalSums();
   const saveInvoice = async () => {
-    await addInvoice({
-      invoiceNo: invoiceFormData?.invoiceNo,
-      venue: invoiceFormData?.venue,
-      approvalId: invoiceFormData?.approvalId,
-      date: invoiceFormData?.date,
-      ref: invoiceFormData?.referredBy,
-      billedBy: user?.email,
-      clientId: companyDetails?.billedTo?._id,
-      totalAmount: total.toString(),
-      tax: (cgst + sgst + igst).toString(),
-      invoiceStatus: false,
-      item: JSON.stringify(tableRows),
-    });
-
-    toast("Invoice Saved!");
-    // router.push('/dashboard')
+    try {
+      await addInvoice({
+        invoiceNo: invoiceFormData?.invoiceNo,
+        venue: invoiceFormData?.venue,
+        approvalId: invoiceFormData?.approvalId,
+        date: invoiceFormData?.date,
+        ref: invoiceFormData?.referredBy,
+        billedBy: user?.email,
+        clientId: companyDetails?.billedTo?._id,
+        totalAmount: total.toString(),
+        tax: (cgst + sgst + igst).toString(),
+        invoiceStatus: false,
+        item: JSON.stringify(tableRows),
+      });
+      setIsSaved(true);
+      toast("Invoice Saved!");
+      // router.push('/dashboard')
+    } catch (err: any) {
+      toast(`Error: ${err?.message ?? "Could not save invoice"}`, {
+        style: { backgroundColor: "red", color: "white" },
+      });
+    }
   };
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
@@ -150,23 +158,29 @@ const PreviewInvoice = () => {
     reactToPrintFn();
   };
   const updateInvoice = async () => {
-    updateInvoiceData({
-      _id: params?.invoiceId,
-      invoiceNo: invoiceFormData?.invoiceNo,
-      venue: invoiceFormData?.venue,
-      approvalId: invoiceFormData?.approvalId,
-      date: invoiceFormData?.date,
-      ref: invoiceFormData?.referredBy,
-      billedBy: user?.email,
-      clientId: companyDetails?.billedTo?._id,
-      totalAmount: total.toString(),
-      tax: (cgst + sgst + igst).toString(),
-      invoiceStatus: false,
-      item: JSON.stringify(tableRows),
-    });
+    try {
+      await updateInvoiceData({
+        _id: params?.invoiceId,
+        invoiceNo: invoiceFormData?.invoiceNo,
+        venue: invoiceFormData?.venue,
+        approvalId: invoiceFormData?.approvalId,
+        date: invoiceFormData?.date,
+        ref: invoiceFormData?.referredBy,
+        billedBy: user?.email,
+        clientId: companyDetails?.billedTo?._id,
+        totalAmount: total.toString(),
+        tax: (cgst + sgst + igst).toString(),
+        invoiceStatus: false,
+        item: JSON.stringify(tableRows),
+      });
 
-    toast("Invoice Updated!");
-    // router.push('/dashboard')
+      toast("Invoice Updated!");
+      // router.push('/dashboard')
+    } catch (err: any) {
+      toast(`Error: ${err?.message ?? "Could not update invoice"}`, {
+        style: { backgroundColor: "red", color: "white" },
+      });
+    }
   };
 
   return (
@@ -181,8 +195,7 @@ const PreviewInvoice = () => {
           {invoiceFormData?.referredBy && <p>Order Reffered By</p>}
         </div>
         <div className="flex flex-col font-semibold gap-1">
-          <div className="flex ">
-            <p>2026-27/ {parseInt(invoiceFormData?.invoiceNo) <10 ? "00" : parseInt(invoiceFormData?.invoiceNo) >9 && parseInt(invoiceFormData?.invoiceNo) <100 ? "0": "" }</p>
+          <div>
             <p>{invoiceFormData?.invoiceNo}</p>
           </div>
           <p>
@@ -404,7 +417,14 @@ const PreviewInvoice = () => {
 
       <div className="flex justify-between avoid-break">
         <div className="gap-5 flex mt-5">
-          <Link href={"/create_invoice"} className="no-print">
+          <Link
+            href={
+              params?.invoiceId
+                ? `/create_invoice/${params.invoiceId}`
+                : "/create_invoice"
+            }
+            className="no-print"
+          >
             <Button>
               <PencilIcon />
               Edit
@@ -415,9 +435,13 @@ const PreviewInvoice = () => {
             Print
           </Button>
           {params?.invoiceId === undefined ? (
-            <Button onClick={saveInvoice} className="no-print bg-purple-600">
+            <Button
+              onClick={saveInvoice}
+              disabled={isSaved}
+              className="no-print bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <Save />
-              Save Invoice
+              {isSaved ? "Invoice Saved" : "Save Invoice"}
             </Button>
           ) : (
             <Button onClick={updateInvoice} className="no-print">
