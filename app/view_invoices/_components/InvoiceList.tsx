@@ -5,10 +5,16 @@ import { Input } from "@/components/ui/input";
 import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import moment from "moment";
 import Link from "next/link";
-// import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import DeleteInvoice from "./DeleteInvoice";
-import { getPaymentStatusInfo, formatIndianNumber } from "@/lib/invoiceUtils";
+import { formatIndianNumber } from "@/lib/invoiceUtils";
+import { useConvex, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { toast } from "sonner";
+import { Calendar, CheckCircle, Clock, X } from "lucide-react";
+import { getDateRange, filterInvoicesByDateRange, FilterType, DateRange } from "@/lib/dateUtils";
+import { DateRangeFilter } from "@/app/dashboard/_components/DateRangeFilter";
 import {
   Pagination,
   PaginationContent,
@@ -21,23 +27,54 @@ import {
 
 const InvoiceList = () => {
   const rowsPerPage = 10;
-  const { invoices } = useInvoiceContext();
+  const { invoices, setInvoices } = useInvoiceContext();
+  const { user } = useKindeBrowserClient();
+  const convex = useConvex();
+  const bulkUpdateStatus = useMutation(api.functions.invoice.bulkUpdatePaymentStatus);
+
   const [localInvoices, setLocalInvoices] = useState(invoices);
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<"all" | "paid" | "pending">("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Date range filter state
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
+  const [customStartDate, setCustomStartDate] = useState<string>();
+  const [customEndDate, setCustomEndDate] = useState<string>();
+  const [dateRange, setDateRange] = useState<DateRange>(getDateRange("all"));
+  const [showDateFilter, setShowDateFilter] = useState(false);
 
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(rowsPerPage);
-  console.log(invoices)
+
+  const handleFilterChange = (filterType: FilterType, customStart?: string, customEnd?: string) => {
+    setSelectedFilter(filterType);
+    if (filterType === "custom" && customStart && customEnd) {
+      setCustomStartDate(customStart);
+      setCustomEndDate(customEnd);
+      setDateRange({
+        startDate: new Date(customStart),
+        endDate: new Date(customEnd),
+      });
+    } else {
+      setDateRange(getDateRange(filterType));
+    }
+  };
 
   const searchItem = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
   };
 
-  // Combined search and filter logic
+  // Combined search, date, and status filter logic
   useEffect(() => {
     let filtered = invoices || [];
+
+    // Apply date range filter
+    if (selectedFilter !== "all") {
+      filtered = filterInvoicesByDateRange(filtered, dateRange);
+    }
 
     // Apply search filter
     if (searchTerm !== "") {
@@ -54,39 +91,124 @@ const InvoiceList = () => {
     }
 
     setLocalInvoices(filtered);
-  }, [invoices, searchTerm, paymentStatusFilter]);
-    
+    setStartIndex(0);
+    setEndIndex(rowsPerPage);
+    // Clear selection when filters change
+    setSelectedIds(new Set());
+  }, [invoices, searchTerm, paymentStatusFilter, dateRange, selectedFilter]);
+
+  // Get currently visible invoices (current page)
+  const visibleInvoices = localInvoices?.slice(startIndex, endIndex) || [];
+
+  // Selection handlers
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    // Select/deselect all FILTERED invoices (not just current page)
+    if (selectedIds.size === localInvoices?.length) {
+      setSelectedIds(new Set());
+    } else {
+      const allIds = new Set(localInvoices?.map((inv: any) => inv._id) || []);
+      setSelectedIds(allIds);
+    }
+  };
+
+  const handleBulkStatusUpdate = async (status: boolean) => {
+    if (selectedIds.size === 0 || !user?.email) return;
+
+    setIsUpdating(true);
+    try {
+      const result = await bulkUpdateStatus({
+        invoiceIds: Array.from(selectedIds) as any,
+        invoiceStatus: status,
+        billedBy: user.email,
+      });
+      toast.success(
+        `${result.updatedCount} invoice(s) marked as ${status ? "Paid" : "Pending"}`
+      );
+      setSelectedIds(new Set());
+      // Refresh invoices from database
+      const refreshed = await convex.query(api.functions.invoice.getInvoices, {
+        email: user.email ?? "",
+      });
+      setInvoices(refreshed as any);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update invoices");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const isAllSelected = localInvoices?.length > 0 && selectedIds.size === localInvoices?.length;
+
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg p-4">
-      <div className="pb-4 bg-white dark:bg-gray-900 ">
-        {/* Payment Status Filter */}
-        <div className="flex gap-2 mb-4">
-          <span className="text-sm font-semibold text-gray-700 flex items-center">Filter by Status:</span>
+      <div className="pb-4 bg-white dark:bg-gray-900">
+        {/* Top Controls Row */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+          {/* Payment Status Filter */}
+          <div className="flex gap-2 items-center">
+            <span className="text-sm font-semibold text-gray-700 flex items-center">Status:</span>
+            <Button
+              onClick={() => setPaymentStatusFilter("all")}
+              variant={paymentStatusFilter === "all" ? "default" : "outline"}
+              size="sm"
+            >
+              All
+            </Button>
+            <Button
+              onClick={() => setPaymentStatusFilter("pending")}
+              variant={paymentStatusFilter === "pending" ? "default" : "outline"}
+              size="sm"
+              className={paymentStatusFilter === "pending" ? "bg-yellow-600" : ""}
+            >
+              Pending
+            </Button>
+            <Button
+              onClick={() => setPaymentStatusFilter("paid")}
+              variant={paymentStatusFilter === "paid" ? "default" : "outline"}
+              size="sm"
+              className={paymentStatusFilter === "paid" ? "bg-green-600" : ""}
+            >
+              Paid
+            </Button>
+          </div>
+
+          {/* Date Filter Toggle */}
           <Button
-            onClick={() => setPaymentStatusFilter("all")}
-            variant={paymentStatusFilter === "all" ? "default" : "outline"}
+            variant="outline"
             size="sm"
+            onClick={() => setShowDateFilter(!showDateFilter)}
+            className="gap-2"
           >
-            All
-          </Button>
-          <Button
-            onClick={() => setPaymentStatusFilter("pending")}
-            variant={paymentStatusFilter === "pending" ? "default" : "outline"}
-            size="sm"
-            className={paymentStatusFilter === "pending" ? "bg-yellow-600" : ""}
-          >
-            ⏳ Pending
-          </Button>
-          <Button
-            onClick={() => setPaymentStatusFilter("paid")}
-            variant={paymentStatusFilter === "paid" ? "default" : "outline"}
-            size="sm"
-            className={paymentStatusFilter === "paid" ? "bg-green-600" : ""}
-          >
-            ✓ Paid
+            <Calendar className="h-4 w-4" />
+            {showDateFilter ? "Hide" : "Date Filter"}
           </Button>
         </div>
 
+        {/* Date Range Filter */}
+        {showDateFilter && (
+          <div className="mb-4">
+            <DateRangeFilter
+              selectedFilter={selectedFilter}
+              customStartDate={customStartDate}
+              customEndDate={customEndDate}
+              onFilterChange={handleFilterChange}
+            />
+          </div>
+        )}
+
+        {/* Search */}
         <label className="sr-only">Search</label>
         <div className="relative mt-1">
           <div className="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -109,17 +231,62 @@ const InvoiceList = () => {
           <Input
             type="text"
             id="table-search"
-            onChange={(e)=>searchItem(e)}
+            onChange={(e) => searchItem(e)}
             className="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search for items"
-
           />
         </div>
       </div>
+
+      {/* Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-blue-800">
+              {selectedIds.size} invoice{selectedIds.size > 1 ? "s" : ""} selected
+            </span>
+            <Button
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 gap-1"
+              onClick={() => handleBulkStatusUpdate(true)}
+              disabled={isUpdating}
+            >
+              <CheckCircle className="h-4 w-4" />
+              Mark as Paid
+            </Button>
+            <Button
+              size="sm"
+              className="bg-yellow-600 hover:bg-yellow-700 gap-1"
+              onClick={() => handleBulkStatusUpdate(false)}
+              disabled={isUpdating}
+            >
+              <Clock className="h-4 w-4" />
+              Mark as Pending
+            </Button>
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelectedIds(new Set())}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase  bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr className="">
-            <th scope="col" className="px-6 py-3 ">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" className="px-4 py-3">
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                onChange={toggleSelectAll}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-pointer"
+              />
+            </th>
+            <th scope="col" className="px-6 py-3">
               Invoice No
             </th>
             <th scope="col" className="px-6 py-3">
@@ -146,12 +313,25 @@ const InvoiceList = () => {
         {invoices?.length != 0 && (
           <>
             <tbody>
-              {localInvoices?.slice(startIndex, endIndex)?.map((eachInvoice) => {
+              {visibleInvoices?.map((eachInvoice: any) => {
+                const isSelected = selectedIds.has(eachInvoice?._id);
                 return (
                   <tr
                     key={eachInvoice?._creationTime}
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${
+                      isSelected
+                        ? "bg-blue-50 dark:bg-blue-900"
+                        : "bg-white dark:bg-gray-800"
+                    }`}
                   >
+                    <td className="px-4 py-4">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelect(eachInvoice?._id)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-pointer"
+                      />
+                    </td>
                     <th
                       scope="row"
                       className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
@@ -164,9 +344,7 @@ const InvoiceList = () => {
                     <td className="px-6 py-4">₹{formatIndianNumber(eachInvoice?.totalAmount)}</td>
                     <td className="px-6 py-4">₹{formatIndianNumber(eachInvoice?.tax)}</td>
                     <td className="px-6 py-4">
-                      {moment(eachInvoice?._creationTime).format(
-                        "DD MMMM YYYY"
-                      )}
+                      {moment(eachInvoice?._creationTime).format("DD MMMM YYYY")}
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -176,16 +354,13 @@ const InvoiceList = () => {
                             : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {eachInvoice?.invoiceStatus
-                          ? "✓ Payment Received"
-                          : "⏳ Pending"}
+                        {eachInvoice?.invoiceStatus ? "Payment Received" : "Pending"}
                       </span>
                     </td>
                     <td className="px-6 py-4 flex items-center gap-4">
                       <Link href={`create_invoice/${eachInvoice?._id}`}>
                         <Button className="p-3">Edit/View</Button>
                       </Link>
-
                       <DeleteInvoice invoiceId={eachInvoice?._id} />
                     </td>
                   </tr>
@@ -197,42 +372,40 @@ const InvoiceList = () => {
       </table>
       {invoices?.length != 0 && (
         <div className="flex justify-center">
-        <Pagination className=" m-2 w-[95%] cursor-pointer">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                className={
-                  startIndex === 0
-                    ? "pointer-events-none opacity-50"
-                    : undefined
-                }
-                onClick={() => {
-                  setStartIndex(startIndex - rowsPerPage);
-                  setEndIndex(endIndex - rowsPerPage);
-                }}
-              />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                className={
-                  endIndex >= invoices?.length
-                    ? "pointer-events-none opacity-50"
-                    : undefined
-                }
-                onClick={() => {
-                  setStartIndex(startIndex + rowsPerPage);
-                  setEndIndex(endIndex + rowsPerPage);
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+          <Pagination className="m-2 w-[95%] cursor-pointer">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  className={
+                    startIndex === 0 ? "pointer-events-none opacity-50" : undefined
+                  }
+                  onClick={() => {
+                    setStartIndex(startIndex - rowsPerPage);
+                    setEndIndex(endIndex - rowsPerPage);
+                  }}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#">1</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  className={
+                    endIndex >= (localInvoices?.length || 0)
+                      ? "pointer-events-none opacity-50"
+                      : undefined
+                  }
+                  onClick={() => {
+                    setStartIndex(startIndex + rowsPerPage);
+                    setEndIndex(endIndex + rowsPerPage);
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
       {invoices?.length == 0 && (
@@ -318,7 +491,7 @@ const InvoiceList = () => {
             </svg>
             <div className="flex flex-col items-center justify-center ">
               <h2 className="text-center text-black text-xl font-semibold leading-loose pb-2">
-                There’s no Invoice here
+                There's no Invoice here
               </h2>
               <p className="text-center text-black text-base font-normal leading-relaxed pb-4"></p>
               <Link href={"/create_invoice"}>

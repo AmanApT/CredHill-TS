@@ -78,6 +78,26 @@ export const updateInvoice = mutation({
    })
   },
 });
+export const bulkUpdatePaymentStatus = mutation({
+  args: {
+    invoiceIds: v.array(v.id("invoice")),
+    invoiceStatus: v.boolean(),
+    billedBy: v.string(), // ensure only this user's invoices are updated
+  },
+  handler: async (ctx, args) => {
+    let updatedCount = 0;
+    for (const id of args.invoiceIds) {
+      const invoice = await ctx.db.get(id);
+      // Only update if the invoice belongs to the current user
+      if (invoice && invoice.billedBy === args.billedBy) {
+        await ctx.db.patch(id, { invoiceStatus: args.invoiceStatus });
+        updatedCount++;
+      }
+    }
+    return { success: true, updatedCount };
+  },
+});
+
 export const deleteInvoice = mutation({
   args: {
     _id: v.id("invoice"), // The ID of the item to delete

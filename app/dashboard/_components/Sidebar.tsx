@@ -31,7 +31,7 @@ interface SidebarSection {
 }
 
 export function Sidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const pathname = usePathname();
   const { setIsCollapsed: setContextCollapsed } = useSidebar();
 
