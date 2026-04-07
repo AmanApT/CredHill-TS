@@ -8,7 +8,7 @@ import React from "react";
 const Header = () => {
   return (
     <header className="bg-white border-b border-gray-100">
-      <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between px-6 py-4">
+      <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between px-3 py-2">
         <h1 className="page-title text-gray-900">Manage Profile</h1>
 
         <div className="flex items-center gap-3">
@@ -33,7 +33,7 @@ const Header = () => {
             </svg>
           </Link>
           <LogoutLink postLogoutRedirectURL="/">
-            <Button className="px-4 py-2.5 h-auto label-text rounded-lg text-white flex items-center gap-2">
+            <Button  size="sm" className="px-4 py-2.5 h-auto label-text rounded-lg text-white flex items-center gap-2">
               <LogOut size={16} />
               Logout
             </Button>

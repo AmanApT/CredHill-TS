@@ -21,7 +21,7 @@ interface ClientWiseInvoicesChartProps {
 export function ClientWiseInvoicesChart({ dateRange }: ClientWiseInvoicesChartProps) {
   const { invoices } = useInvoiceContext();
   const [clientData, setClientData] = useState<ClientData[]>([]);
-  const [allClients, setAllClients] = useState([]);
+  const [allClients, setAllClients] = useState<{ _id: string; clientName: string }[]>([]);
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
 
@@ -31,7 +31,7 @@ export function ClientWiseInvoicesChart({ dateRange }: ClientWiseInvoicesChartPr
         const clients = await convex.query(api.functions.clients.getClients, {
           email: user?.email || "",
         });
-        setAllClients(clients);
+        setAllClients(clients as unknown as { _id: string; clientName: string }[]);
       }
     };
 
@@ -69,12 +69,12 @@ export function ClientWiseInvoicesChart({ dateRange }: ClientWiseInvoicesChartPr
   if (clientData.length === 0) {
     return (
       <Card className="w-full border-0 shadow-md">
-        <CardHeader>
-          <CardTitle>Client-Wise Invoices</CardTitle>
-          <CardDescription>No invoice data available</CardDescription>
+        <CardHeader className="px-4 py-3">
+          <CardTitle className="text-sm font-semibold">Client-Wise Invoices</CardTitle>
+          <CardDescription className="text-xs">No invoice data available</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-64 flex items-center justify-center text-gray-500">
+        <CardContent className="px-4 pb-3">
+          <div className="h-48 flex items-center justify-center text-gray-500 text-sm">
             Create invoices to see client-wise breakdown
           </div>
         </CardContent>
@@ -84,30 +84,25 @@ export function ClientWiseInvoicesChart({ dateRange }: ClientWiseInvoicesChartPr
 
   return (
     <Card className="w-full border-0 shadow-md">
-      <CardHeader>
-        <CardTitle>Client-Wise Invoices</CardTitle>
-        <CardDescription>Number of invoices per client</CardDescription>
+      <CardHeader className="px-4 py-3">
+        <CardTitle className="text-sm font-semibold">Client-Wise Invoices</CardTitle>
+        <CardDescription className="text-xs">Number of invoices per client</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={clientData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+      <CardContent className="px-2 pb-3">
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={clientData} margin={{ top: 5, right: 10, left: 0, bottom: 40 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-            <XAxis
-              dataKey="clientName"
-              angle={-45}
-              textAnchor="end"
-              height={100}
-              tick={{ fontSize: 12 }}
-            />
-            <YAxis tick={{ fontSize: 12 }} />
+            <XAxis dataKey="clientName" tick={false} axisLine={false} height={8} />
+            <YAxis tick={{ fontSize: 11 }} width={30} />
             <Tooltip
               contentStyle={{
                 backgroundColor: "#f9fafb",
                 border: "1px solid #e5e7eb",
                 borderRadius: "8px",
+                fontSize: "12px",
               }}
             />
-            <Bar dataKey="invoiceCount" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="invoiceCount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

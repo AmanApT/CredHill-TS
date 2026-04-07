@@ -89,8 +89,8 @@ export function Sidebar() {
       } shadow-[0_4px_24px_rgba(0,0,0,0.08)] border-r border-gray-100`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
-        <div className={`flex items-center gap-2.5 ${isCollapsed ? "justify-center w-full" : ""}`}>
+      <div className={`flex items-center border-b border-gray-100 px-3 py-4 ${isCollapsed ? "flex-col gap-3" : "justify-between px-4"}`}>
+        <div className="flex items-center gap-2.5">
           <div className="bg-orange-50 rounded-lg p-1.5 flex-shrink-0">
             <FileText className="h-5 w-5 text-orange-500" />
           </div>
@@ -101,15 +101,13 @@ export function Sidebar() {
             </div>
           )}
         </div>
-        {!isCollapsed && (
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1 hover:bg-gray-100 rounded transition text-gray-500"
-            title="Collapse"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-        )}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-1.5 hover:bg-gray-100 rounded-lg transition text-gray-500 flex-shrink-0"
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </button>
       </div>
 
       {/* Navigation Sections */}
@@ -150,16 +148,6 @@ export function Sidebar() {
         ))}
       </div>
 
-      {/* Expand button when collapsed */}
-      {isCollapsed && (
-        <button
-          onClick={() => setIsCollapsed(false)}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 p-1.5 hover:bg-gray-100 rounded-lg transition text-gray-500"
-          title="Expand"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      )}
     </div>
   );
 }

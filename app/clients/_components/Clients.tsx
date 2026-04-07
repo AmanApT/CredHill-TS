@@ -42,22 +42,19 @@ const Clients = () => {
 
   return (
     <section className="bg-slate-50">
-      <div className="overflow-x-auto flex justify-center flex-wrap gap-10 w-full p-8">
+      <div className="overflow-x-auto flex justify-center flex-wrap gap-10 w-full p-4">
         {clients?.map((eachClient, id) => (
           <div
             key={id}
-            className="relative w-full md:w-[48%] border-gray-200 p-8 shadow-xl transition hover:border-orange-500/10 hover:shadow-orange-500/10 bg-white rounded-lg border sm:p-6 lg:p-8"
+            className="relative w-full md:w-[48%] border-gray-200 p-4 shadow-xl transition hover:border-orange-500/10 hover:shadow-orange-500/10 bg-white rounded-lg border "
           >
             <span className="absolute inset-x-0 bottom-0 h-2 bg-gradient-to-r from-orange-300 via-orange-500 to-purple-600"></span>
 
-            <div className="sm:flex sm:justify-between sm:gap-4">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 sm:text-xl">
-                  {eachClient?.clientName}
-                </h3>
-                <p className="mt-1 text-xs font-medium text-gray-600">
-                  {eachClient?.email}
-                </p>
+            <div className="flex justify-between w-full">
+              <div className="flex items-center justify-between  w-full">
+                <h3 className="text-lg font-bold text-gray-900 sm:text-xl">{eachClient?.clientName}</h3>
+
+                <p className="text-xs font-medium text-gray-600 whitespace-nowrap">{eachClient?.email}</p>
               </div>
             </div>
 
@@ -89,12 +86,8 @@ const Clients = () => {
 
             <dl className="mt-6 flex justify-between sm:gap-6">
               <div className="flex flex-col-reverse">
-                <dt className="text-sm font-medium text-gray-600">
-                  Created At
-                </dt>
-                <dd className="text-xs text-gray-500">
-                  {moment(eachClient?._creationTime).format("DD MMM, YYYY")}
-                </dd>
+                <dt className="text-sm font-medium text-gray-600">Created At</dt>
+                <dd className="text-xs text-gray-500">{moment(eachClient?._creationTime).format("DD MMM, YYYY")}</dd>
               </div>
 
               <EditClient clientDetails={eachClient} />

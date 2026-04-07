@@ -55,7 +55,7 @@ export function RecentInvoices({ dateRange }: RecentInvoicesProps) {
                         : "text-yellow-600"
                     }`}
                   >
-                    {invoice.invoiceStatus ? "✓ Paid" : "⏳ Pending"}
+                    {invoice.invoiceStatus ? "✓ Paid" : "⏳ Unpaid"}
                   </p>
                 </div>
                 <Link href={`/create_invoice/${invoice._id}`}>

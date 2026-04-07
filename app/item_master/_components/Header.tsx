@@ -84,7 +84,7 @@ const Header = () => {
   
   return (
     <header className="bg-white border-b border-gray-100">
-      <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between px-6 py-4">
+      <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between px-2 py-2">
           <h1 className="page-title text-gray-900">Item Master</h1>
 
           <div className="flex items-center gap-3">
@@ -111,7 +111,7 @@ const Header = () => {
 
             <Dialog open={isOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger onClick={() => setIsOpen(true)} asChild>
-                <Button className="px-4 py-2.5 h-auto label-text rounded-lg bg-green-600 hover:bg-green-700">Add Item</Button>
+                <Button size="sm" className="px-4 py-2.5 h-auto label-text rounded-lg bg-green-600 hover:bg-green-700">Add Item</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
@@ -153,7 +153,7 @@ const Header = () => {
                   </div>
                 </div>
 
-                <Button onClick={createItem} type="submit">
+                <Button size={"sm"} onClick={createItem} type="submit">
                   Add Item
                 </Button>
               </DialogContent>

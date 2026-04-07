@@ -68,12 +68,12 @@ export function ClientWiseRevenueChart({ dateRange }: ClientWiseRevenueChartProp
   if (clientData.length === 0) {
     return (
       <Card className="w-full border-0 shadow-md">
-        <CardHeader>
-          <CardTitle>Client-Wise Revenue</CardTitle>
-          <CardDescription>No revenue data available</CardDescription>
+        <CardHeader className="px-4 py-3">
+          <CardTitle className="text-sm font-semibold">Client-Wise Revenue</CardTitle>
+          <CardDescription className="text-xs">No revenue data available</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-64 flex items-center justify-center text-gray-500">
+        <CardContent className="px-4 pb-3">
+          <div className="h-48 flex items-center justify-center text-gray-500 text-sm">
             Create invoices to see client-wise revenue
           </div>
         </CardContent>
@@ -83,23 +83,18 @@ export function ClientWiseRevenueChart({ dateRange }: ClientWiseRevenueChartProp
 
   return (
     <Card className="w-full border-0 shadow-md">
-      <CardHeader>
-        <CardTitle>Client-Wise Revenue</CardTitle>
-        <CardDescription>Total revenue per client</CardDescription>
+      <CardHeader className="px-4 py-3">
+        <CardTitle className="text-sm font-semibold">Client-Wise Revenue</CardTitle>
+        <CardDescription className="text-xs">Total revenue per client</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={clientData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+      <CardContent className="px-2 pb-3">
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={clientData} margin={{ top: 5, right: 10, left: 0, bottom: 40 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-            <XAxis
-              dataKey="clientName"
-              angle={-45}
-              textAnchor="end"
-              height={100}
-              tick={{ fontSize: 12 }}
-            />
+            <XAxis dataKey="clientName" tick={false} axisLine={false} height={8} />
             <YAxis
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11 }}
+              width={40}
               tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
             />
             <Tooltip
@@ -107,10 +102,11 @@ export function ClientWiseRevenueChart({ dateRange }: ClientWiseRevenueChartProp
                 backgroundColor: "#f9fafb",
                 border: "1px solid #e5e7eb",
                 borderRadius: "8px",
+                fontSize: "12px",
               }}
               formatter={(value: number) => [`₹${formatIndianNumber(value)}`, "Revenue"]}
             />
-            <Bar dataKey="revenue" radius={[8, 8, 0, 0]}>
+            <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
               {clientData.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}

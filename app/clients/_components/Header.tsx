@@ -101,7 +101,7 @@ const Header = () => {
   };
   return (
     <header className="bg-white border-b border-gray-100">
-      <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between px-6 py-4">
+      <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between py-2 px-4">
           <h1 className="page-title text-gray-900">Manage Clients</h1>
 
           <div className="flex items-center gap-3">

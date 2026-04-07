@@ -100,13 +100,13 @@ export function PendingInvoicesByClientChart({ dateRange }: PendingInvoicesByCli
   if (pendingData.length === 0) {
     return (
       <Card className="w-full border-0 shadow-md">
-        <CardHeader>
-          <CardTitle>Pending Invoices by Client</CardTitle>
-          <CardDescription>No pending invoices</CardDescription>
+        <CardHeader className="px-4 py-3">
+          <CardTitle className="text-sm font-semibold">Unpaid Invoices by Client</CardTitle>
+          <CardDescription className="text-xs">No pending invoices</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-64 flex items-center justify-center text-gray-500">
-            All invoices have been paid! 🎉
+        <CardContent className="px-4 pb-3">
+          <div className="h-48 flex items-center justify-center text-gray-500 text-sm">
+            All invoices have been paid!
           </div>
         </CardContent>
       </Card>
@@ -115,12 +115,12 @@ export function PendingInvoicesByClientChart({ dateRange }: PendingInvoicesByCli
 
   return (
     <Card className="w-full border-0 shadow-md">
-      <CardHeader>
-        <CardTitle>Pending Invoices by Client</CardTitle>
-        <CardDescription>Number of unpaid invoices per client (Top 10 + Others)</CardDescription>
+      <CardHeader className="px-4 py-3">
+        <CardTitle className="text-sm font-semibold">Unpaid Invoices by Client</CardTitle>
+        <CardDescription className="text-xs">Number of unpaid invoices per client (Top 10 + Others)</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+      <CardContent className="px-2 pb-3">
+        <ResponsiveContainer width="100%" height={250}>
           <PieChart>
             <Pie
               data={pendingData}
@@ -130,7 +130,7 @@ export function PendingInvoicesByClientChart({ dateRange }: PendingInvoicesByCli
               label={({ clientName, pendingInvoices }) =>
                 `${clientName}: ${pendingInvoices}`
               }
-              outerRadius={100}
+              outerRadius={80}
               fill="#8884d8"
               dataKey="pendingInvoices"
             >
@@ -143,9 +143,10 @@ export function PendingInvoicesByClientChart({ dateRange }: PendingInvoicesByCli
                 backgroundColor: "#f9fafb",
                 border: "1px solid #e5e7eb",
                 borderRadius: "8px",
+                fontSize: "12px",
               }}
             />
-            <Legend />
+            <Legend wrapperStyle={{ fontSize: "11px" }} />
           </PieChart>
         </ResponsiveContainer>
       </CardContent>

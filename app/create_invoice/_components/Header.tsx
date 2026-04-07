@@ -15,26 +15,21 @@ const Header = () => {
 
   return (
     <header className="bg-white">
-      <div className=" px-4 py-2 sm:px-2 sm:py-4 lg:px-8">
+      <div className=" px-4 py-2">
         <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
+            <h1 className="text-xl font-bold text-gray-900 sm">
               {headerTitle}
             </h1>
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              className="inline-flex items-center justify-center gap-1.5 rounded border border-gray-200 bg-white px-5 py-3 text-gray-900 transition hover:text-gray-700 focus:outline-none focus:ring"
-              type="button"
-            >
-              <Link href="/dashboard">
-                <span className="text-sm font-medium"> Go to Dashboard </span>
-              </Link>
-
+            <Link href="/dashboard">
+            <div className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-1.5 text-gray-700 transition hover:bg-gray-50 focus:outline-none">
+              <span className="label-text">Go to Dashboard</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="size-4"
+                className="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -46,15 +41,13 @@ const Header = () => {
                   d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                 />
               </svg>
-            </button>
-            <Link href={"/profile"}>
-              <button
-                className="inline-block rounded bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring"
-                type="button"
-              >
-                Profile
-              </button>
-            </Link>
+            </div>
+          </Link>
+           <Link href="/profile">
+            <div className="inline-block rounded-lg bg-orange-500 px-4 py-1.5 label-text text-white transition hover:bg-slate-700 focus:outline-none">
+              Profile
+            </div>
+          </Link>
           </div>
         </div>
       </div>

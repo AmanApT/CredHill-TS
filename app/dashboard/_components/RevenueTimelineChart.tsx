@@ -114,16 +114,15 @@ export function RevenueTimelineChart({ dateRange }: RevenueTimelineChartProps) {
 
   return (
     <Card className="w-full border-0 shadow-md">
-      <CardHeader>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <CardHeader className="px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <CardTitle>Revenue & Invoices Timeline</CardTitle>
-            <CardDescription>Track revenue and invoice volume over time</CardDescription>
+            <CardTitle className="text-sm font-semibold">Revenue & Invoices Timeline</CardTitle>
+            <CardDescription className="text-xs">Track revenue and invoice volume over time</CardDescription>
           </div>
-        </div>
 
         {/* Controls */}
-        <div className="flex flex-wrap gap-6 pt-2">
+        <div className="flex flex-wrap gap-4">
           {/* X-Axis: Time Grouping */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-gray-500 uppercase">X-Axis:</span>
@@ -173,16 +172,17 @@ export function RevenueTimelineChart({ dateRange }: RevenueTimelineChartProps) {
             </div>
           </div>
         </div>
+        </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="px-2 pb-3">
         {chartData.length === 0 ? (
-          <div className="h-64 flex items-center justify-center text-gray-500">
+          <div className="h-48 flex items-center justify-center text-gray-500 text-sm">
             No data available for the selected period
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={350}>
-            <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 20 }}>
+          <ResponsiveContainer width="100%" height={320}>
+            <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 10 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />

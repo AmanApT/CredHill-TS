@@ -134,7 +134,7 @@ const InvoiceList = () => {
         billedBy: user.email,
       });
       toast.success(
-        `${result.updatedCount} invoice(s) marked as ${status ? "Paid" : "Pending"}`
+        `${result.updatedCount} invoice(s) marked as ${status ? "Paid" : "Unpaid"}`
       );
       setSelectedIds(new Set());
       // Refresh invoices from database
@@ -172,7 +172,7 @@ const InvoiceList = () => {
               size="sm"
               className={paymentStatusFilter === "pending" ? "bg-yellow-600" : ""}
             >
-              Pending
+              Unpaid
             </Button>
             <Button
               onClick={() => setPaymentStatusFilter("paid")}
@@ -261,7 +261,7 @@ const InvoiceList = () => {
               disabled={isUpdating}
             >
               <Clock className="h-4 w-4" />
-              Mark as Pending
+              Mark as Unpaid
             </Button>
           </div>
           <Button
@@ -351,7 +351,7 @@ const InvoiceList = () => {
                             : "bg-amber-50 text-amber-700"
                         }`}
                       >
-                        {eachInvoice?.invoiceStatus ? "Received" : "Pending"}
+                        {eachInvoice?.invoiceStatus ? "Paid" : "Unpaid"}
                       </span>
                     </td>
                     <td className="px-4 py-3.5 flex items-center gap-3">

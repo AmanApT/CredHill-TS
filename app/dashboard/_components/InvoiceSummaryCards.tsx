@@ -136,7 +136,7 @@ export function InvoiceSummaryCards({ dateRange }: InvoiceSummaryCardsProps) {
 
         return (
           <Card key={index} className="border-0 shadow-md">
-            <CardHeader className={`pb-3 ${metric.bgColor}`}>
+            <CardHeader className={`py-2 ${metric.bgColor}`}>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium text-gray-700">
                   {metric.title}
@@ -144,8 +144,8 @@ export function InvoiceSummaryCards({ dateRange }: InvoiceSummaryCardsProps) {
                 <Icon className={`h-5 w-5 ${metric.color}`} />
               </div>
             </CardHeader>
-            <CardContent className="pt-4">
-              <div className={`text-2xl font-bold ${metric.color}`}>
+            <CardContent className="py-2">
+              <div className={`text-xl font-bold ${metric.color}`}>
                 {metric.value}
               </div>
               {metric.changePercent !== 0 && (

@@ -205,10 +205,10 @@ const Dashboard = () => {
       <Header />
 
       {/* Main Dashboard Container */}
-      <div className="px-6 py-6">
+      <div className="px-4 py-2">
         {/* Summary Cards - Top */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
             <h2 className="section-heading text-gray-900">Invoice Summary</h2>
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-md">
@@ -229,7 +229,7 @@ const Dashboard = () => {
 
           {/* Date Range Filter - Toggleable (Below Heading) */}
           {showDateFilter && (
-            <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+            <div className="my-4">
               <DateRangeFilter
                 selectedFilter={selectedFilter}
                 customStartDate={customStartDate}
@@ -287,28 +287,28 @@ const Dashboard = () => {
 
         {/* Charts - Rendered in order based on selection */}
         {selectedCharts.includes("timeline") && (
-          <div className="mb-8">
+          <div className="mb-4">
             <RevenueTimelineChart dateRange={dateRange} />
           </div>
         )}
 
         {/* Pair up side-by-side charts */}
         {(selectedCharts.includes("clientInvoices") || selectedCharts.includes("pendingInvoices")) && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
             {selectedCharts.includes("clientInvoices") && <ClientWiseInvoicesChart dateRange={dateRange} />}
             {selectedCharts.includes("pendingInvoices") && <PendingInvoicesByClientChart dateRange={dateRange} />}
           </div>
         )}
 
         {(selectedCharts.includes("clientRevenue") || selectedCharts.includes("clientPending")) && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
             {selectedCharts.includes("clientRevenue") && <ClientWiseRevenueChart dateRange={dateRange} />}
             {selectedCharts.includes("clientPending") && <ClientWisePendingPaymentChart dateRange={dateRange} />}
           </div>
         )}
 
         {selectedCharts.includes("recentActivity") && (
-          <div className="mb-8">
+          <div className="mb-4">
             <h2 className="section-heading text-gray-900 mb-4">Recent Activity</h2>
             <RecentInvoices dateRange={dateRange} />
           </div>
