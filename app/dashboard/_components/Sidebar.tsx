@@ -9,13 +9,10 @@ import {
   Users,
   Eye,
   Package,
-  Home,
+  LayoutDashboard,
   ChevronLeft,
   ChevronRight,
-  LayoutDashboard,
   Settings,
-  HelpCircle,
-  MessageSquare,
 } from "lucide-react";
 
 
@@ -81,16 +78,6 @@ export function Sidebar() {
         },
       ],
     },
-    // {
-    //   title: "Help",
-    //   items: [
-    //     {
-    //       icon: <MessageSquare className="h-5 w-5" />,
-    //       label: "Support",
-    //       href: "#",
-    //     },
-    //   ],
-    // },
   ];
 
   const isActive = (href: string) => pathname === href;
@@ -98,59 +85,64 @@ export function Sidebar() {
   return (
     <div
       className={`fixed left-0 top-0 h-screen bg-white text-gray-800 transition-all duration-300 z-40 ${
-        isCollapsed ? "w-20" : "w-64"
-      } shadow-[0_10px_30px_rgba(249,115,22,0.1)]`}
+        isCollapsed ? "w-16" : "w-60"
+      } shadow-[0_4px_24px_rgba(0,0,0,0.08)] border-r border-gray-100`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-200">
-        <div className={`flex items-center gap-3 ${isCollapsed ? "justify-center w-full" : ""}`}>
-          <div className="bg-orange-50 rounded-lg p-2">
-            <FileText className="h-6 w-6 text-orange-500" />
-
+      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+        <div className={`flex items-center gap-2.5 ${isCollapsed ? "justify-center w-full" : ""}`}>
+          <div className="bg-orange-50 rounded-lg p-1.5 flex-shrink-0">
+            <FileText className="h-5 w-5 text-orange-500" />
           </div>
           {!isCollapsed && (
             <div>
-              <h1 className="text-lg font-bold text-gray-900">CredHill</h1>
-              <p className="text-xs text-gray-500">Manage Invoices</p>
+              <h1 className="text-[15px] font-bold text-gray-900 leading-tight">CredHill</h1>
+              <p className="small-text text-gray-500">Manage Invoices</p>
             </div>
           )}
         </div>
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1 hover:bg-gray-200 rounded transition hidden md:block text-gray-600"
-          title={isCollapsed ? "Expand" : "Collapse"}
-        >
-          {isCollapsed ? (
-            <ChevronRight className="h-5 w-5" />
-          ) : (
-            <ChevronLeft className="h-5 w-5" />
-          )}
-        </button>
+        {!isCollapsed && (
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1 hover:bg-gray-100 rounded transition text-gray-500"
+            title="Collapse"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Navigation Sections */}
-      <div className="overflow-y-auto h-[calc(100vh-100px)]">
+      <div className="overflow-y-auto h-[calc(100vh-64px)] py-2">
         {mainSections.map((section, sectionIdx) => (
-          <div key={sectionIdx} className="py-4">
+          <div key={sectionIdx} className="py-2">
             {!isCollapsed && (
-              <h3 className="px-6 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <h3 className="px-4 py-1.5 small-text font-semibold text-gray-400 uppercase tracking-wider">
                 {section.title}
               </h3>
             )}
-            <nav className="space-y-1">
+            <nav className="space-y-0.5">
               {section.items.map((item, itemIdx) => (
                 <Link
                   key={itemIdx}
                   href={item.href}
-                  className={`flex items-center gap-3 px-6 py-3 mx-2 rounded-lg transition ${
+                  className={`flex items-center gap-3 py-2.5 mx-2 rounded-lg transition ${
+                    isCollapsed ? "justify-center px-2" : "px-3"
+                  } ${
                     isActive(item.href)
-                      ? "bg-orange-100 text-orange-600 font-semibold"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-orange-50 text-orange-600"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                   title={isCollapsed ? item.label : ""}
                 >
-                  <span className="flex-shrink-0">{item.icon}</span>
-                  {!isCollapsed && <span>{item.label}</span>}
+                  <span className={`flex-shrink-0 ${isActive(item.href) ? "text-orange-500" : ""}`}>
+                    {item.icon}
+                  </span>
+                  {!isCollapsed && (
+                    <span className={`label-text ${isActive(item.href) ? "font-semibold text-orange-600" : ""}`}>
+                      {item.label}
+                    </span>
+                  )}
                 </Link>
               ))}
             </nav>
@@ -158,15 +150,15 @@ export function Sidebar() {
         ))}
       </div>
 
-      {/* Footer Info */}
-      {false && (
-      // {!isCollapsed && (
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-orange-50 border-t border-orange-200 text-xs text-gray-600">
-          <p className="text-center">
-            {/* 💡 */}
-             <span className="block mt-1 text-orange-600 font-semibold">Made with  </span>
-          </p>
-        </div>
+      {/* Expand button when collapsed */}
+      {isCollapsed && (
+        <button
+          onClick={() => setIsCollapsed(false)}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 p-1.5 hover:bg-gray-100 rounded-lg transition text-gray-500"
+          title="Expand"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
       )}
     </div>
   );

@@ -81,3 +81,16 @@ export function getFilterDisplayText(filterType: FilterType): string {
   };
   return textMap[filterType];
 }
+
+/**
+ * Returns the date of the oldest invoice, or today if no invoices exist.
+ * Uses invoice.date (the invoice date field, not creation time).
+ */
+export function getOldestInvoiceDate(invoices: any[]): Date {
+  if (!invoices || invoices.length === 0) return new Date();
+  const oldest = invoices.reduce((min, inv) => {
+    const d = new Date(inv.date || inv._creationTime);
+    return d < min ? d : min;
+  }, new Date());
+  return oldest;
+}

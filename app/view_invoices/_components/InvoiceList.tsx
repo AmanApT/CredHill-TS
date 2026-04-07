@@ -152,13 +152,13 @@ const InvoiceList = () => {
   const isAllSelected = localInvoices?.length > 0 && selectedIds.size === localInvoices?.length;
 
   return (
-    <div className="relative overflow-x-auto shadow-md sm:rounded-lg p-4">
+    <div className="relative overflow-x-auto rounded-xl border border-gray-100 shadow-sm p-5 bg-white">
       <div className="pb-4 bg-white dark:bg-gray-900">
         {/* Top Controls Row */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           {/* Payment Status Filter */}
           <div className="flex gap-2 items-center">
-            <span className="text-sm font-semibold text-gray-700 flex items-center">Status:</span>
+            <span className="label-text text-gray-600 flex items-center">Status:</span>
             <Button
               onClick={() => setPaymentStatusFilter("all")}
               variant={paymentStatusFilter === "all" ? "default" : "outline"}
@@ -275,8 +275,8 @@ const InvoiceList = () => {
         </div>
       )}
 
-      <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <table className="w-full text-left text-gray-600">
+        <thead className="bg-gray-50 border-b border-gray-100">
           <tr>
             <th scope="col" className="px-4 py-3">
               <input
@@ -286,25 +286,25 @@ const InvoiceList = () => {
                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-pointer"
               />
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Invoice No
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Invoice Date
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Total Amount
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Taxes
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Updated At
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Payment Status
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Actions
             </th>
           </tr>
@@ -318,13 +318,13 @@ const InvoiceList = () => {
                 return (
                   <tr
                     key={eachInvoice?._creationTime}
-                    className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${
+                    className={`border-b border-gray-50 transition-colors ${
                       isSelected
-                        ? "bg-blue-50 dark:bg-blue-900"
-                        : "bg-white dark:bg-gray-800"
+                        ? "bg-blue-50"
+                        : "bg-white hover:bg-gray-50"
                     }`}
                   >
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-3.5">
                       <input
                         type="checkbox"
                         checked={isSelected}
@@ -332,34 +332,31 @@ const InvoiceList = () => {
                         className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-pointer"
                       />
                     </td>
-                    <th
-                      scope="row"
-                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                    >
+                    <td className="px-4 py-3.5 table-content font-medium text-gray-900 whitespace-nowrap">
                       {eachInvoice?.invoiceNo}
-                    </th>
-                    <td className="px-6 py-4">
-                      {moment(eachInvoice?.date).format("DD MMMM, YYYY")}
                     </td>
-                    <td className="px-6 py-4">₹{formatIndianNumber(eachInvoice?.totalAmount)}</td>
-                    <td className="px-6 py-4">₹{formatIndianNumber(eachInvoice?.tax)}</td>
-                    <td className="px-6 py-4">
-                      {moment(eachInvoice?._creationTime).format("DD MMMM YYYY")}
+                    <td className="px-4 py-3.5 table-content text-gray-600">
+                      {moment(eachInvoice?.date).format("DD MMM YYYY")}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3.5 table-content text-gray-900 font-medium">₹{formatIndianNumber(eachInvoice?.totalAmount)}</td>
+                    <td className="px-4 py-3.5 table-content text-gray-600">₹{formatIndianNumber(eachInvoice?.tax)}</td>
+                    <td className="px-4 py-3.5 table-content text-gray-500">
+                      {moment(eachInvoice?._creationTime).format("DD MMM YYYY")}
+                    </td>
+                    <td className="px-4 py-3.5">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        className={`px-2.5 py-1 rounded-full small-text font-medium ${
                           eachInvoice?.invoiceStatus
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
+                            ? "bg-green-50 text-green-700"
+                            : "bg-amber-50 text-amber-700"
                         }`}
                       >
-                        {eachInvoice?.invoiceStatus ? "Payment Received" : "Pending"}
+                        {eachInvoice?.invoiceStatus ? "Received" : "Pending"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 flex items-center gap-4">
+                    <td className="px-4 py-3.5 flex items-center gap-3">
                       <Link href={`create_invoice/${eachInvoice?._id}`}>
-                        <Button className="p-3">Edit/View</Button>
+                        <Button size="sm" className="h-8 px-3 label-text">Edit/View</Button>
                       </Link>
                       <DeleteInvoice invoiceId={eachInvoice?._id} />
                     </td>

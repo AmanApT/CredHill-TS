@@ -6,7 +6,7 @@ const page = () => {
   return (
     <div className="">
       <Header />
-      <div className="p-4 md:p-6 md:px-12 lg:px-24 bg-gray-100 ">
+      <div className="p-4 md:p-2 md:px-2 lg:px-2 bg-gray-100 ">
         <div className="flex gap-4 items-center justify-center">
           <span className="rounded-full w-6 h-6 text-xs flex items-center justify-center text-white bg-purple-700">1</span>
           <span className="text-gray-900">Invoice Details</span>

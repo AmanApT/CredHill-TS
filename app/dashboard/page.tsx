@@ -18,7 +18,7 @@ import { RecentInvoices } from "./_components/RecentInvoices";
 import { DateRangeFilter } from "./_components/DateRangeFilter";
 import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import { usePathname } from 'next/navigation'
-import { getDateRange, FilterType, DateRange, getFilterDisplayText } from "@/lib/dateUtils";
+import { getDateRange, FilterType, DateRange, getFilterDisplayText, getOldestInvoiceDate } from "@/lib/dateUtils";
 import { Calendar, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import moment from "moment";
@@ -63,9 +63,12 @@ const Dashboard = () => {
     if (filterType === "custom" && customStart && customEnd) {
       setCustomStartDate(customStart);
       setCustomEndDate(customEnd);
-      const startDate = new Date(customStart);
-      const endDate = new Date(customEnd);
-      setDateRange({ startDate, endDate });
+      setDateRange({ startDate: new Date(customStart), endDate: new Date(customEnd) });
+    } else if (filterType === "all") {
+      setCustomStartDate(undefined);
+      setCustomEndDate(undefined);
+      const startDate = getOldestInvoiceDate(invoices ?? []);
+      setDateRange({ startDate, endDate: new Date() });
     } else {
       setCustomStartDate(undefined);
       setCustomEndDate(undefined);
@@ -74,7 +77,7 @@ const Dashboard = () => {
   };
 
 
-  const {setInvoiceFormData,setCompanyDetails,setTableRows} = useInvoiceContext();
+  const {setInvoiceFormData,setCompanyDetails,setTableRows, invoices} = useInvoiceContext();
 
   useEffect(() => {
     if (pathname.includes('dashboard')) {
@@ -135,7 +138,7 @@ const Dashboard = () => {
         },])
     }
 }, [pathname]);
-  const { setInvoices} = useInvoiceContext()
+  const { setInvoices } = useInvoiceContext()
   const { user } = useKindeBrowserClient();
   // const [invoices, setInvoices] = useState<[]>();
   const convex = useConvex();
@@ -189,16 +192,24 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  // Recompute "all time" start date once invoices are loaded
+  useEffect(() => {
+    if (selectedFilter === "all" && invoices && invoices.length > 0) {
+      const startDate = getOldestInvoiceDate(invoices);
+      setDateRange({ startDate, endDate: new Date() });
+    }
+  }, [invoices, selectedFilter]);
+
   return (
     <section className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Header />
 
       {/* Main Dashboard Container */}
-      <div className="p-4">
+      <div className="px-6 py-6">
         {/* Summary Cards - Top */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">Invoice Summary</h2>
+            <h2 className="section-heading text-gray-900">Invoice Summary</h2>
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-md">
                 {moment(dateRange.startDate).format("DD MMM YYYY")} — {moment(dateRange.endDate).format("DD MMM YYYY")}
@@ -298,7 +309,7 @@ const Dashboard = () => {
 
         {selectedCharts.includes("recentActivity") && (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+            <h2 className="section-heading text-gray-900 mb-4">Recent Activity</h2>
             <RecentInvoices dateRange={dateRange} />
           </div>
         )}

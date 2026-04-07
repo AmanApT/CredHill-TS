@@ -83,27 +83,19 @@ const Header = () => {
   };
   
   return (
-    <header className="bg-white">
-      <div className=" px-4 py-2 sm:px-2 sm:py-4 lg:px-8">
-        <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
-              Item Master
-            </h1>
-          </div>
+    <header className="bg-white border-b border-gray-100">
+      <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between px-6 py-4">
+          <h1 className="page-title text-gray-900">Item Master</h1>
 
-          <div className="flex items-center gap-4">
-            <button
-              className="inline-flex items-center justify-center gap-1.5 rounded border border-gray-200 bg-white px-5 py-3 text-gray-900 transition hover:text-gray-700 focus:outline-none focus:ring"
-              type="button"
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-gray-700 transition hover:bg-gray-50 focus:outline-none"
             >
-              <Link href="/dashboard">
-                <span className="text-sm font-medium"> Dashboard </span>
-              </Link>
-
+              <span className="label-text">Dashboard</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="size-4"
+                className="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -115,11 +107,11 @@ const Header = () => {
                   d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                 />
               </svg>
-            </button>
+            </Link>
 
             <Dialog open={isOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger onClick={() => setIsOpen(true)} asChild>
-                <Button className="bg-green-600">Add Item</Button>
+                <Button className="px-4 py-2.5 h-auto label-text rounded-lg bg-green-600 hover:bg-green-700">Add Item</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
@@ -167,7 +159,6 @@ const Header = () => {
               </DialogContent>
             </Dialog>
           </div>
-        </div>
       </div>
     </header>
   );

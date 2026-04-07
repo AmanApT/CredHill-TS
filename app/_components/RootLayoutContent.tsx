@@ -19,11 +19,11 @@ export function RootLayoutContent({ children }: RootLayoutContentProps) {
   const isLandingPage = pathname === "/";
   const shouldShowSidebar = isAuthenticated && !isLandingPage;
 
-  // Adjust margin based on sidebar state
+  // Adjust margin based on sidebar state (matches Sidebar w-16 collapsed / w-60 expanded)
   const marginClass = shouldShowSidebar
     ? isCollapsed
-      ? "ml-20"
-      : "ml-64"
+      ? "ml-16"
+      : "ml-60"
     : "";
 
   return (

@@ -66,8 +66,8 @@ const ItemCards = () => {
   }, [user]);
 
   return (
-    <div className="relative overflow-x-auto shadow-md sm:rounded-lg p-4">
-      <div className="pb-4 bg-white dark:bg-gray-900">
+    <div className="relative overflow-x-auto rounded-xl border border-gray-100 shadow-sm p-5 bg-white">
+      <div className="pb-4 bg-white">
         <label className="sr-only">Search</label>
         <div className="relative mt-1">
           <div className="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -97,22 +97,22 @@ const ItemCards = () => {
         </div>
       </div>
 
-      <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <table className="w-full text-left text-gray-600">
+        <thead className="bg-gray-50 border-b border-gray-100">
           <tr>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Item Name
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               HSN/SAC
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Description
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Created At
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3 table-header text-gray-500 uppercase tracking-wide">
               Actions
             </th>
           </tr>
@@ -125,20 +125,17 @@ const ItemCards = () => {
                 return (
                   <tr
                     key={eachItem?._id}
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    className="bg-white border-b border-gray-50 hover:bg-gray-50 transition-colors"
                   >
-                    <th
-                      scope="row"
-                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                    >
+                    <td className="px-4 py-3.5 table-content font-medium text-gray-900 whitespace-nowrap">
                       {eachItem?.itemName}
-                    </th>
-                    <td className="px-6 py-4">{eachItem?.hsn}</td>
-                    <td className="px-6 py-4">{eachItem?.description || "-"}</td>
-                    <td className="px-6 py-4">
-                      {moment(eachItem?._creationTime).format("DD MMMM YYYY")}
                     </td>
-                    <td className="px-6 py-4 flex items-center gap-4">
+                    <td className="px-4 py-3.5 table-content text-gray-600">{eachItem?.hsn}</td>
+                    <td className="px-4 py-3.5 table-content text-gray-500">{eachItem?.description || "-"}</td>
+                    <td className="px-4 py-3.5 table-content text-gray-500">
+                      {moment(eachItem?._creationTime).format("DD MMM YYYY")}
+                    </td>
+                    <td className="px-4 py-3.5 flex items-center gap-3">
                       <EditItem itemDetails={eachItem} />
                       <DeleteItem itemId={eachItem?._id} />
                     </td>
