@@ -412,21 +412,21 @@ const PreviewInvoice = () => {
                 )}
               </div>
               <div className="flex flex-col gap-2 text-right">
-                <p>₹{formatIndianNumber(amount)}</p>
+                <p>₹{formatIndianNumber(amount, true)}</p>
                 {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
                   <>
-                    <p>₹{formatIndianNumber(cgst)} </p>
-                    <p>₹{formatIndianNumber(sgst)}</p>
+                    <p>₹{formatIndianNumber(cgst, true)} </p>
+                    <p>₹{formatIndianNumber(sgst, true)}</p>
                   </>
                 ) : (
-                  <p>₹ {formatIndianNumber(igst)}</p>
+                  <p>₹ {formatIndianNumber(igst, true)}</p>
                 )}
               </div>
             </div>
             <hr className="mt-4 border border-black" />
             <div className="py-1 flex text-base justify-between font-bold">
               <span>Total (INR)</span>
-              <span>₹ {formatIndianNumber(total)}</span>
+              <span>₹ {formatIndianNumber(total, true)}</span>
             </div>
             <hr className="border border-black" />
             <div>

@@ -39,7 +39,7 @@ interface RevenueTimelineChartProps {
 
 export function RevenueTimelineChart({ dateRange }: RevenueTimelineChartProps) {
   const { invoices } = useInvoiceContext();
-  const [timeGrouping, setTimeGrouping] = useState<TimeGrouping>("monthly");
+  const [timeGrouping, setTimeGrouping] = useState<TimeGrouping>("weekly");
   const [metric, setMetric] = useState<MetricType>("both");
   const [chartData, setChartData] = useState<TimelineDataPoint[]>([]);
 
