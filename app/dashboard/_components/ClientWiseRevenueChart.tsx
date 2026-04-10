@@ -7,7 +7,7 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { api } from "@/convex/_generated/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { filterInvoicesByDateRange, DateRange } from "@/lib/dateUtils";
+import { filterInvoicesByDateRange, filterInvoicesByClients, DateRange } from "@/lib/dateUtils";
 import { formatIndianNumber } from "@/lib/invoiceUtils";
 
 interface ClientRevenueData {
@@ -17,6 +17,7 @@ interface ClientRevenueData {
 
 interface ClientWiseRevenueChartProps {
   dateRange: DateRange;
+  selectedClientIds?: string[];
 }
 
 const COLORS = [
@@ -24,7 +25,7 @@ const COLORS = [
   "#14b8a6", "#10b981", "#22c55e", "#84cc16", "#eab308",
 ];
 
-export function ClientWiseRevenueChart({ dateRange }: ClientWiseRevenueChartProps) {
+export function ClientWiseRevenueChart({ dateRange, selectedClientIds = [] }: ClientWiseRevenueChartProps) {
   const { invoices } = useInvoiceContext();
   const [clientData, setClientData] = useState<ClientRevenueData[]>([]);
   const [allClients, setAllClients] = useState([]);
@@ -45,7 +46,10 @@ export function ClientWiseRevenueChart({ dateRange }: ClientWiseRevenueChartProp
 
   useEffect(() => {
     if (invoices && allClients.length > 0) {
-      const filteredInvoices = filterInvoicesByDateRange(invoices || [], dateRange);
+      const filteredInvoices = filterInvoicesByClients(
+        filterInvoicesByDateRange(invoices || [], dateRange),
+        selectedClientIds
+      );
       const clientRevenue: { [key: string]: number } = {};
 
       filteredInvoices?.forEach((invoice: any) => {
@@ -63,7 +67,7 @@ export function ClientWiseRevenueChart({ dateRange }: ClientWiseRevenueChartProp
 
       setClientData(chartData);
     }
-  }, [invoices, allClients, dateRange]);
+  }, [invoices, allClients, dateRange, selectedClientIds]);
 
   if (clientData.length === 0) {
     return (

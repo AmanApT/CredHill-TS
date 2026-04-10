@@ -7,7 +7,7 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { api } from "@/convex/_generated/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { filterInvoicesByDateRange, DateRange } from "@/lib/dateUtils";
+import { filterInvoicesByDateRange, filterInvoicesByClients, DateRange } from "@/lib/dateUtils";
 import { formatIndianNumber } from "@/lib/invoiceUtils";
 
 interface ClientPendingData {
@@ -17,6 +17,7 @@ interface ClientPendingData {
 
 interface ClientWisePendingPaymentChartProps {
   dateRange: DateRange;
+  selectedClientIds?: string[];
 }
 
 const COLORS = [
@@ -24,7 +25,7 @@ const COLORS = [
   "#dc2626", "#e11d48", "#be123c", "#c026d3", "#9333ea",
 ];
 
-export function ClientWisePendingPaymentChart({ dateRange }: ClientWisePendingPaymentChartProps) {
+export function ClientWisePendingPaymentChart({ dateRange, selectedClientIds = [] }: ClientWisePendingPaymentChartProps) {
   const { invoices } = useInvoiceContext();
   const [clientData, setClientData] = useState<ClientPendingData[]>([]);
   const [allClients, setAllClients] = useState([]);
@@ -45,7 +46,10 @@ export function ClientWisePendingPaymentChart({ dateRange }: ClientWisePendingPa
 
   useEffect(() => {
     if (invoices && allClients.length > 0) {
-      const filteredInvoices = filterInvoicesByDateRange(invoices || [], dateRange);
+      const filteredInvoices = filterInvoicesByClients(
+        filterInvoicesByDateRange(invoices || [], dateRange),
+        selectedClientIds
+      );
       const clientPending: { [key: string]: number } = {};
 
       // Only count unpaid invoices
@@ -66,7 +70,7 @@ export function ClientWisePendingPaymentChart({ dateRange }: ClientWisePendingPa
 
       setClientData(chartData);
     }
-  }, [invoices, allClients, dateRange]);
+  }, [invoices, allClients, dateRange, selectedClientIds]);
 
   if (clientData.length === 0) {
     return (

@@ -5,18 +5,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import moment from "moment";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { filterInvoicesByDateRange, DateRange } from "@/lib/dateUtils";
+import { filterInvoicesByDateRange, filterInvoicesByClients, DateRange } from "@/lib/dateUtils";
 import { formatIndianNumber } from "@/lib/invoiceUtils";
 
 interface RecentInvoicesProps {
   dateRange: DateRange;
+  selectedClientIds?: string[];
 }
 
-export function RecentInvoices({ dateRange }: RecentInvoicesProps) {
+export function RecentInvoices({ dateRange, selectedClientIds = [] }: RecentInvoicesProps) {
   const { invoices } = useInvoiceContext();
 
-  // Filter by date range, then get last 5
-  const filteredInvoices = filterInvoicesByDateRange(invoices || [], dateRange);
+  // Filter by date range + clients, then get last 5
+  const filteredInvoices = filterInvoicesByClients(
+    filterInvoicesByDateRange(invoices || [], dateRange),
+    selectedClientIds
+  );
   const recentInvoices = filteredInvoices
     ?.slice()
     .sort((a: any, b: any) => b._creationTime - a._creationTime)

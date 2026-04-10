@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { filterInvoicesByDateRange, DateRange } from "@/lib/dateUtils";
+import { filterInvoicesByDateRange, filterInvoicesByClients, DateRange } from "@/lib/dateUtils";
 import { formatIndianNumber } from "@/lib/invoiceUtils";
 import moment from "moment";
 
@@ -35,9 +35,10 @@ interface TimelineDataPoint {
 
 interface RevenueTimelineChartProps {
   dateRange: DateRange;
+  selectedClientIds?: string[];
 }
 
-export function RevenueTimelineChart({ dateRange }: RevenueTimelineChartProps) {
+export function RevenueTimelineChart({ dateRange, selectedClientIds = [] }: RevenueTimelineChartProps) {
   const { invoices } = useInvoiceContext();
   const [timeGrouping, setTimeGrouping] = useState<TimeGrouping>("weekly");
   const [metric, setMetric] = useState<MetricType>("both");
@@ -46,7 +47,10 @@ export function RevenueTimelineChart({ dateRange }: RevenueTimelineChartProps) {
   useEffect(() => {
     if (!invoices) return;
 
-    const filteredInvoices = filterInvoicesByDateRange(invoices || [], dateRange);
+    const filteredInvoices = filterInvoicesByClients(
+      filterInvoicesByDateRange(invoices || [], dateRange),
+      selectedClientIds
+    );
     const grouped: { [key: string]: { revenue: number; invoiceCount: number } } = {};
 
     // Generate all time buckets in range so we get zero-value entries too
@@ -107,7 +111,7 @@ export function RevenueTimelineChart({ dateRange }: RevenueTimelineChartProps) {
     );
 
     setChartData(data);
-  }, [invoices, dateRange, timeGrouping]);
+  }, [invoices, dateRange, timeGrouping, selectedClientIds]);
 
   const showRevenue = metric === "revenue" || metric === "both";
   const showCount = metric === "invoiceCount" || metric === "both";

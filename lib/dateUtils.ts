@@ -83,6 +83,16 @@ export function getFilterDisplayText(filterType: FilterType): string {
 }
 
 /**
+ * Filter invoices by selected client IDs.
+ * If selectedClientIds is empty, returns all invoices (no filter applied).
+ */
+export function filterInvoicesByClients(invoices: any[], selectedClientIds: string[]): any[] {
+  if (!invoices || invoices.length === 0) return [];
+  if (!selectedClientIds || selectedClientIds.length === 0) return invoices;
+  return invoices.filter((inv) => selectedClientIds.includes(inv.clientId));
+}
+
+/**
  * Returns the date of the oldest invoice, or today if no invoices exist.
  * Uses invoice.date (the invoice date field, not creation time).
  */

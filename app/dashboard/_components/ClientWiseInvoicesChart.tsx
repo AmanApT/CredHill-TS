@@ -7,7 +7,7 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { api } from "@/convex/_generated/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { filterInvoicesByDateRange, DateRange } from "@/lib/dateUtils";
+import { filterInvoicesByDateRange, filterInvoicesByClients, DateRange } from "@/lib/dateUtils";
 
 interface ClientData {
   clientName: string;
@@ -16,9 +16,10 @@ interface ClientData {
 
 interface ClientWiseInvoicesChartProps {
   dateRange: DateRange;
+  selectedClientIds?: string[];
 }
 
-export function ClientWiseInvoicesChart({ dateRange }: ClientWiseInvoicesChartProps) {
+export function ClientWiseInvoicesChart({ dateRange, selectedClientIds = [] }: ClientWiseInvoicesChartProps) {
   const { invoices } = useInvoiceContext();
   const [clientData, setClientData] = useState<ClientData[]>([]);
   const [allClients, setAllClients] = useState<{ _id: string; clientName: string }[]>([]);
@@ -40,8 +41,11 @@ export function ClientWiseInvoicesChart({ dateRange }: ClientWiseInvoicesChartPr
 
   useEffect(() => {
     if (invoices && allClients.length > 0) {
-      // Filter invoices by date range
-      const filteredInvoices = filterInvoicesByDateRange(invoices || [], dateRange);
+      // Filter invoices by date range and clients
+      const filteredInvoices = filterInvoicesByClients(
+        filterInvoicesByDateRange(invoices || [], dateRange),
+        selectedClientIds
+      );
       const clientInvoiceCounts: { [key: string]: number } = {};
 
       // Count invoices per client
@@ -64,7 +68,7 @@ export function ClientWiseInvoicesChart({ dateRange }: ClientWiseInvoicesChartPr
 
       setClientData(chartData);
     }
-  }, [invoices, allClients, dateRange]);
+  }, [invoices, allClients, dateRange, selectedClientIds]);
 
   if (clientData.length === 0) {
     return (

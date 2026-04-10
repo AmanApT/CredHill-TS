@@ -12,8 +12,8 @@ import { useConvex, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { toast } from "sonner";
-import { Calendar, CheckCircle, Clock, X } from "lucide-react";
-import { getDateRange, filterInvoicesByDateRange, FilterType, DateRange } from "@/lib/dateUtils";
+import { Calendar, CheckCircle, Clock, X, Users, ChevronDown } from "lucide-react";
+import { getDateRange, filterInvoicesByDateRange, filterInvoicesByClients, FilterType, DateRange } from "@/lib/dateUtils";
 import { DateRangeFilter } from "@/app/dashboard/_components/DateRangeFilter";
 import {
   Pagination,
@@ -45,8 +45,21 @@ const InvoiceList = () => {
   const [dateRange, setDateRange] = useState<DateRange>(getDateRange("all"));
   const [showDateFilter, setShowDateFilter] = useState(false);
 
+  // Client filter state
+  const [allClients, setAllClients] = useState<{ _id: string; clientName: string }[]>([]);
+  const [selectedClientIds, setSelectedClientIds] = useState<string[]>([]);
+  const [showClientFilter, setShowClientFilter] = useState(false);
+
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(rowsPerPage);
+
+  useEffect(() => {
+    if (user?.email) {
+      convex.query(api.functions.clients.getClients, { email: user.email }).then(
+        (clients) => setAllClients(clients as unknown as { _id: string; clientName: string }[])
+      );
+    }
+  }, [convex, user?.email]);
 
   const handleFilterChange = (filterType: FilterType, customStart?: string, customEnd?: string) => {
     setSelectedFilter(filterType);
@@ -67,7 +80,7 @@ const InvoiceList = () => {
     setSearchTerm(term);
   };
 
-  // Combined search, date, and status filter logic
+  // Combined search, date, client, and status filter logic
   useEffect(() => {
     let filtered = invoices || [];
 
@@ -75,6 +88,9 @@ const InvoiceList = () => {
     if (selectedFilter !== "all") {
       filtered = filterInvoicesByDateRange(filtered, dateRange);
     }
+
+    // Apply client filter
+    filtered = filterInvoicesByClients(filtered, selectedClientIds);
 
     // Apply search filter
     if (searchTerm !== "") {
@@ -95,7 +111,7 @@ const InvoiceList = () => {
     setEndIndex(rowsPerPage);
     // Clear selection when filters change
     setSelectedIds(new Set());
-  }, [invoices, searchTerm, paymentStatusFilter, dateRange, selectedFilter]);
+  }, [invoices, searchTerm, paymentStatusFilter, dateRange, selectedFilter, selectedClientIds]);
 
   // Get currently visible invoices (current page)
   const visibleInvoices = localInvoices?.slice(startIndex, endIndex) || [];
@@ -185,15 +201,115 @@ const InvoiceList = () => {
           </div>
 
           {/* Date Filter Toggle */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDateFilter(!showDateFilter)}
-            className="gap-2"
-          >
-            <Calendar className="h-4 w-4" />
-            {showDateFilter ? "Hide" : "Date Filter"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setShowDateFilter(!showDateFilter); setShowClientFilter(false); }}
+              className="gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              {showDateFilter ? "Hide" : "Date Filter"}
+            </Button>
+
+            {/* Client Filter */}
+            <div className="relative">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { setShowClientFilter(!showClientFilter); setShowDateFilter(false); }}
+                className={`gap-2 ${selectedClientIds.length > 0 ? "border-orange-400 text-orange-600 bg-orange-50" : ""}`}
+              >
+                <Users className="h-4 w-4" />
+                {selectedClientIds.length === 0
+                  ? "Clients"
+                  : selectedClientIds.length === allClients.length
+                  ? "All Clients"
+                  : `${selectedClientIds.length} Client${selectedClientIds.length > 1 ? "s" : ""}`}
+                <ChevronDown className={`h-3 w-3 transition-transform ${showClientFilter ? "rotate-180" : ""}`} />
+              </Button>
+
+              {showClientFilter && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowClientFilter(false)} />
+                  <div className="absolute right-0 z-20 mt-2 w-60 bg-white border border-gray-200 rounded-xl shadow-lg py-2">
+                    {/* Select All */}
+                    <button
+                      onClick={() =>
+                        setSelectedClientIds(
+                          selectedClientIds.length === allClients.length
+                            ? []
+                            : allClients.map((c) => c._id)
+                        )
+                      }
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-50 border-b border-gray-100 transition-colors"
+                    >
+                      <span className={`flex items-center justify-center w-4 h-4 rounded border flex-shrink-0 ${
+                        selectedClientIds.length === allClients.length
+                          ? "bg-orange-500 border-orange-500 text-white"
+                          : selectedClientIds.length > 0
+                          ? "bg-orange-100 border-orange-400"
+                          : "border-gray-300"
+                      }`}>
+                        {selectedClientIds.length === allClients.length && (
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                        {selectedClientIds.length > 0 && selectedClientIds.length < allClients.length && (
+                          <span className="w-2 h-2 bg-orange-400 rounded-sm block" />
+                        )}
+                      </span>
+                      <span className="font-medium text-gray-700">All Clients</span>
+                    </button>
+
+                    {/* Individual clients */}
+                    <div className="max-h-52 overflow-y-auto">
+                      {allClients.map((client) => {
+                        const isSelected = selectedClientIds.includes(client._id);
+                        return (
+                          <button
+                            key={client._id}
+                            onClick={() =>
+                              setSelectedClientIds((prev) =>
+                                isSelected
+                                  ? prev.filter((id) => id !== client._id)
+                                  : [...prev, client._id]
+                              )
+                            }
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                          >
+                            <span className={`flex items-center justify-center w-4 h-4 rounded border flex-shrink-0 ${
+                              isSelected ? "bg-orange-500 border-orange-500 text-white" : "border-gray-300"
+                            }`}>
+                              {isSelected && (
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </span>
+                            <span className={isSelected ? "text-gray-900 font-medium" : "text-gray-600"}>
+                              {client.clientName}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Clear */}
+                    {selectedClientIds.length > 0 && (
+                      <button
+                        onClick={() => setSelectedClientIds([])}
+                        className="w-full px-4 py-2 text-xs text-orange-600 hover:bg-orange-50 border-t border-gray-100 transition-colors"
+                      >
+                        Clear selection
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Date Range Filter */}

@@ -3,18 +3,22 @@
 import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, CheckCircle, DollarSign, AlertCircle, TrendingUp } from "lucide-react";
-import { filterInvoicesByDateRange, DateRange, getDateRange } from "@/lib/dateUtils";
+import { filterInvoicesByDateRange, filterInvoicesByClients, DateRange, getDateRange } from "@/lib/dateUtils";
 import { formatIndianNumber } from "@/lib/invoiceUtils";
 
 interface InvoiceSummaryCardsProps {
   dateRange: DateRange;
+  selectedClientIds?: string[];
 }
 
-export function InvoiceSummaryCards({ dateRange }: InvoiceSummaryCardsProps) {
+export function InvoiceSummaryCards({ dateRange, selectedClientIds = [] }: InvoiceSummaryCardsProps) {
   const { invoices } = useInvoiceContext();
 
   // Calculate metrics for current period
-  const filteredInvoices = filterInvoicesByDateRange(invoices || [], dateRange);
+  const filteredInvoices = filterInvoicesByClients(
+    filterInvoicesByDateRange(invoices || [], dateRange),
+    selectedClientIds
+  );
 
   const totalInvoices = filteredInvoices.length;
 

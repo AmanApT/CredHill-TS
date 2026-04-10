@@ -7,7 +7,7 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { api } from "@/convex/_generated/api";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { filterInvoicesByDateRange, DateRange } from "@/lib/dateUtils";
+import { filterInvoicesByDateRange, filterInvoicesByClients, DateRange } from "@/lib/dateUtils";
 
 interface PendingData {
   clientName: string;
@@ -16,6 +16,7 @@ interface PendingData {
 
 interface PendingInvoicesByClientChartProps {
   dateRange: DateRange;
+  selectedClientIds?: string[];
 }
 
 const COLORS = [
@@ -31,7 +32,7 @@ const COLORS = [
   "#3b82f6",
 ];
 
-export function PendingInvoicesByClientChart({ dateRange }: PendingInvoicesByClientChartProps) {
+export function PendingInvoicesByClientChart({ dateRange, selectedClientIds = [] }: PendingInvoicesByClientChartProps) {
   const { invoices } = useInvoiceContext();
   const [pendingData, setPendingData] = useState<PendingData[]>([]);
   const [allClients, setAllClients] = useState([]);
@@ -53,8 +54,11 @@ export function PendingInvoicesByClientChart({ dateRange }: PendingInvoicesByCli
 
   useEffect(() => {
     if (invoices && allClients.length > 0) {
-      // Filter invoices by date range
-      const filteredInvoices = filterInvoicesByDateRange(invoices || [], dateRange);
+      // Filter invoices by date range and clients
+      const filteredInvoices = filterInvoicesByClients(
+        filterInvoicesByDateRange(invoices || [], dateRange),
+        selectedClientIds
+      );
       const clientPendingCounts: { [key: string]: number } = {};
 
       // Count pending invoices per client
@@ -95,7 +99,7 @@ export function PendingInvoicesByClientChart({ dateRange }: PendingInvoicesByCli
 
       setPendingData(finalData);
     }
-  }, [invoices, allClients, dateRange]);
+  }, [invoices, allClients, dateRange, selectedClientIds]);
 
   if (pendingData.length === 0) {
     return (

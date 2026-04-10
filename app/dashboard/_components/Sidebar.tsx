@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/contexts/SidebarContext";
 import {
-  FileText,
   Users,
   Eye,
   Package,
@@ -13,7 +12,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Settings,
+  FileText,
 } from "lucide-react";
+import Image from "next/image";
+import { AnnouncementCard } from "@/app/_components/AnnouncementCard";
 
 
 interface SidebarItem {
@@ -91,8 +93,8 @@ export function Sidebar() {
       {/* Header */}
       <div className={`flex items-center border-b border-gray-100 px-3 py-4 ${isCollapsed ? "flex-col gap-3" : "justify-between px-4"}`}>
         <div className="flex items-center gap-2.5">
-          <div className="bg-orange-50 rounded-lg p-1.5 flex-shrink-0">
-            <FileText className="h-5 w-5 text-orange-500" />
+          <div className="rounded-lg flex-shrink-0">
+            <Image src="/favicon.ico" alt="CredHill" width={32} height={32} className="rounded-lg" />
           </div>
           {!isCollapsed && (
             <div>
@@ -111,7 +113,8 @@ export function Sidebar() {
       </div>
 
       {/* Navigation Sections */}
-      <div className="overflow-y-auto h-[calc(100vh-64px)] py-2">
+      <div className="flex flex-col justify-between h-[calc(100vh-64px)]">
+      <div className="overflow-y-auto py-2 flex-1">
         {mainSections.map((section, sectionIdx) => (
           <div key={sectionIdx} className="py-2">
             {!isCollapsed && (
@@ -148,6 +151,18 @@ export function Sidebar() {
         ))}
       </div>
 
+      {/* Announcement card at the bottom */}
+      <div className="pb-2">
+        <AnnouncementCard
+          collapsed={isCollapsed}
+          title="Invoice Theme Customizer & Client Wise Dashboard Filter"
+          description="Personalize your invoice colors and font size. Open any invoice preview and click the Theme button.
+          Also, now you can filter you dashboard and invoices data client wise
+          "
+        />
+      </div>
+
+      </div>
     </div>
   );
 }

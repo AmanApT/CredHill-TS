@@ -2,6 +2,13 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  invoicePreferences: defineTable({
+    email: v.string(),
+    themeColor: v.string(),
+    accentColor: v.string(),
+    fontSize: v.string(),
+  }).index("by_email", ["email"]),
+
   invoice: defineTable({
     invoiceNo: v.string(),
     venue: v.string(),

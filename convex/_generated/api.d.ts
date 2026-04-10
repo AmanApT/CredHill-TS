@@ -16,6 +16,7 @@ import type {
 import type * as functions_account from "../functions/account.js";
 import type * as functions_clients from "../functions/clients.js";
 import type * as functions_invoice from "../functions/invoice.js";
+import type * as functions_invoicePreferences from "../functions/invoicePreferences.js";
 import type * as functions_items from "../functions/items.js";
 import type * as functions_user from "../functions/user.js";
 
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   "functions/account": typeof functions_account;
   "functions/clients": typeof functions_clients;
   "functions/invoice": typeof functions_invoice;
+  "functions/invoicePreferences": typeof functions_invoicePreferences;
   "functions/items": typeof functions_items;
   "functions/user": typeof functions_user;
 }>;
