@@ -53,17 +53,17 @@ const InvoiceForm: React.FC = () => {
   console.log(invoices, "allInvoices");
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
-  const [clients, setClients] = useState([]);
+  const [clients, setClients] = useState<any[]>([]);
 
   const getAllItems = async () => {
     const result = await convex.query(api.functions.items.getItems, {
-      email: user?.email,
+      email: user?.email ?? "",
     });
     console.log(result);
     setItems(result);
   };
-  const [openStates, setOpenStates] = useState({});
-  const toggleOpenState = (rowIndex, isOpen) => {
+  const [openStates, setOpenStates] = useState<{ [key: number]: boolean }>({});
+  const toggleOpenState = (rowIndex: number, isOpen: boolean) => {
     setOpenStates((prev) => ({
       ...prev,
       [rowIndex]: isOpen,
@@ -97,7 +97,7 @@ const InvoiceForm: React.FC = () => {
       console.log(client, "client");
       setCompanyDetails((prevDetails) => ({
         ...prevDetails,
-        billedTo: client,
+        billedTo: client ?? prevDetails.billedTo,
       }));
 
       setTableRows(JSON?.parse(foundInvoice?.item));
@@ -141,12 +141,12 @@ const InvoiceForm: React.FC = () => {
   const getBankDetails = async () => {
     try {
       const result = await convex.query(api.functions.account.getBankDetails, {
-        email: user?.email,
+        email: user?.email ?? "",
       });
       if (result && result.length > 0) {
         setCompanyDetails((prevDetails) => ({
           ...prevDetails,
-          accountInfo: result[0],
+          accountInfo: result[0] as any,
         })); // Update state with the first result
       } else {
         console.warn("No user found with this email");
@@ -323,8 +323,8 @@ const InvoiceForm: React.FC = () => {
             ...(field === "quantity" || field === "rate"
               ? (() => {
                   const quantity =
-                    field === "quantity" ? value : tableRow.quantity;
-                  const rate = field === "rate" ? value : tableRow.rate;
+                    field === "quantity" ? Number(value) : tableRow.quantity;
+                  const rate = field === "rate" ? Number(value) : tableRow.rate;
                   const amount = quantity * rate;
                   const isLocalGST =
                     companyDetails?.billedTo?.gst?.substring(0, 2) === "07";
@@ -454,7 +454,7 @@ const InvoiceForm: React.FC = () => {
             <div className=" p-4 bg-white border my-3 rounded-md flex flex-col gap-2">
               {/* <p className="text-[#6538BF]">Billed By</p> */}
               <p className="font-bold my-2">Business Details</p>
-              <p>{companyDetails?.billedBy.companyName.toUpperCase()}</p>
+              <p>{companyDetails?.billedBy.companyName?.toUpperCase()}</p>
               {companyDetails?.billedBy?.companyAddress && (
                 <p>{companyDetails?.billedBy?.companyAddress} </p>
               )}

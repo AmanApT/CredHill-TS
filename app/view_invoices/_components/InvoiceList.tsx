@@ -288,7 +288,7 @@ const InvoiceList = () => {
                                 </svg>
                               )}
                             </span>
-                            <span className={isSelected ? "text-gray-900 font-medium" : "text-gray-600"}>
+                            <span className={`text-left ${isSelected ? "text-gray-900 font-medium" : "text-gray-600"}`}>
                               {client.clientName}
                             </span>
                           </button>

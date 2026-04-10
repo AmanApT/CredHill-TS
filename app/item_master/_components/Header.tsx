@@ -41,7 +41,7 @@ const Header = () => {
     });
     setItemDetails({
       itemName: "",
-      email: user?.email,
+      email: user?.email ?? "",
       hsn: "",
     });
     setIsOpen(!isOpen);
@@ -55,7 +55,7 @@ const Header = () => {
   useEffect(() => {
     setItemDetails((prev) => ({
       ...prev,
-      email: user?.email,
+      email: user?.email ?? "",
     }));
   }, [user]);
 
@@ -67,7 +67,7 @@ const Header = () => {
         itemName: "",
         hsn: "",
       
-        email: user?.email,
+        email: user?.email ?? "",
       
       });
     }

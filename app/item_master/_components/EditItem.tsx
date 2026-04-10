@@ -15,13 +15,14 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 type EachItem = {
+  _id?: string;
   itemName: string;
   hsn: string;
   email: string;
 };
 
 type EditEachItem = {
-  clientDetails: EachItem;
+  itemDetails: EachItem;
 };
 const EditItem: FunctionComponent<EditEachItem> = ({ itemDetails }) => {
     const [isDialogOpen, setDialogOpen] = useState(false); // State for dialog open/close
@@ -46,7 +47,7 @@ const EditItem: FunctionComponent<EditEachItem> = ({ itemDetails }) => {
   const updateItemDetails = async () => {
     try {
       await updateItem({
-        _id: itemDetails?._id,
+        _id: itemDetails?._id as any,
         email: itemDetails?.email,
         itemName:itemForm?.itemName,
         hsn:itemForm?.hsn,

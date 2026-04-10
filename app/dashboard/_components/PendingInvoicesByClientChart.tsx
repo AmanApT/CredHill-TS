@@ -35,7 +35,7 @@ const COLORS = [
 export function PendingInvoicesByClientChart({ dateRange, selectedClientIds = [] }: PendingInvoicesByClientChartProps) {
   const { invoices } = useInvoiceContext();
   const [pendingData, setPendingData] = useState<PendingData[]>([]);
-  const [allClients, setAllClients] = useState([]);
+  const [allClients, setAllClients] = useState<any[]>([]);
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
 

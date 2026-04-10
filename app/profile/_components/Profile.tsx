@@ -37,7 +37,7 @@ const Profile = () => {
     try {
       if (editMode) {
         await updateFile({
-          _id: profileDetails?._id,
+          _id: profileDetails?._id as any,
           email: profileDetails?.email,
           companyName: profileDetails?.companyName,
           gst: profileDetails?.gst,
@@ -65,7 +65,7 @@ const Profile = () => {
         email: user?.email,
       });
       if (result && result.length > 0) {
-        setProfileDetails(result[0]); // Update state with the first result
+        setProfileDetails(result[0] as any); // Update state with the first result
       } else {
         console.warn("No user found with this email");
       }

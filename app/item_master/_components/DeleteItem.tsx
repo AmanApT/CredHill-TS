@@ -22,7 +22,7 @@ const DeleteItem: FunctionComponent<EditItem> = ({ itemId }) => {
   const deleteItem = useMutation(api.functions.items.deleteItem);
   const handleDelete = async (itemId: unknown)=>{
     await deleteItem({
-      _id:itemId
+      _id: itemId as any
     })
     toast("Item Deleted")
     setTimeout(() => {

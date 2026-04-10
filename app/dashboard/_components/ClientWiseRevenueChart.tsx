@@ -28,7 +28,7 @@ const COLORS = [
 export function ClientWiseRevenueChart({ dateRange, selectedClientIds = [] }: ClientWiseRevenueChartProps) {
   const { invoices } = useInvoiceContext();
   const [clientData, setClientData] = useState<ClientRevenueData[]>([]);
-  const [allClients, setAllClients] = useState([]);
+  const [allClients, setAllClients] = useState<any[]>([]);
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
 

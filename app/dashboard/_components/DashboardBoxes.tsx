@@ -9,7 +9,7 @@ interface DashboardData {
   cta: string;
   ctaColor: string;
   href: string;
-  image: unknown; // Adjust to Image type if using TS or explicitly type imported images.
+  image: string;
 }
 
 interface DashboardBoxesProps {

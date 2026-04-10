@@ -34,10 +34,10 @@ const AccountInfo = () => {
   const getBankDetails = async () => {
     try {
       const result = await convex.query(api.functions.account.getBankDetails, {
-        email: user?.email,
+        email: user?.email ?? "",
       });
       if (result && result.length > 0) {
-        setAccountDetails(result[0]); // Update state with the first result
+        setAccountDetails(result[0] as any); // Update state with the first result
       } else {
         console.warn("No user found with this email");
       }
@@ -55,7 +55,7 @@ const AccountInfo = () => {
     try {
       if (editMode) {
         await updateAccount({
-          _id: accountDetails?._id,
+          _id: accountDetails?._id as any,
           email: accountDetails?.email,
           bankName: accountDetails?.bankName,
           ifsc: accountDetails?.ifsc,

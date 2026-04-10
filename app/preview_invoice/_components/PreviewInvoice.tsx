@@ -204,8 +204,8 @@ const PreviewInvoice = () => {
         approvalId: invoiceFormData?.approvalId,
         date: invoiceFormData?.date,
         ref: invoiceFormData?.referredBy,
-        billedBy: user?.email,
-        clientId: companyDetails?.billedTo?._id,
+        billedBy: user?.email ?? "",
+        clientId: (companyDetails?.billedTo as any)?._id,
         totalAmount: total.toString(),
         tax: (cgst + sgst + igst).toString(),
         invoiceStatus: invoiceFormData?.invoiceStatus ?? false,
@@ -221,21 +221,21 @@ const PreviewInvoice = () => {
     }
   };
   const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({ contentRef });
+  const reactToPrintFn = useReactToPrint({ contentRef: contentRef as any });
   const printInvoice = () => {
     reactToPrintFn();
   };
   const updateInvoice = async () => {
     try {
       await updateInvoiceData({
-        _id: params?.invoiceId,
+        _id: params?.invoiceId as any,
         invoiceNo: invoiceFormData?.invoiceNo,
         venue: invoiceFormData?.venue,
         approvalId: invoiceFormData?.approvalId,
         date: invoiceFormData?.date,
         ref: invoiceFormData?.referredBy,
-        billedBy: user?.email,
-        clientId: companyDetails?.billedTo?._id,
+        billedBy: user?.email ?? "",
+        clientId: (companyDetails?.billedTo as any)?._id,
         totalAmount: total.toString(),
         tax: (cgst + sgst + igst).toString(),
         invoiceStatus: invoiceFormData?.invoiceStatus ?? false,
@@ -423,7 +423,7 @@ const PreviewInvoice = () => {
         <div className="flex w-[45vw] text-xs flex-col rounded-md p-3" style={s.accent}>
           <p className="text-base font-semibold" style={s.primaryText}>Billed By</p>
           <p className="font-bold">
-            {companyDetails?.billedBy.companyName.toUpperCase()}
+            {companyDetails?.billedBy.companyName?.toUpperCase()}
           </p>
           {companyDetails?.billedBy.add && (
             <p>{companyDetails?.billedBy.add}</p>
@@ -454,7 +454,7 @@ const PreviewInvoice = () => {
         <div className="flex w-[45vw] text-xs flex-col rounded-md p-3" style={s.accent}>
           <p className="text-base font-semibold" style={s.primaryText}>Billed To</p>
           <p className="font-bold">
-            {companyDetails?.billedTo.clientName.toUpperCase()}
+            {companyDetails?.billedTo.clientName?.toUpperCase()}
           </p>
           {companyDetails?.billedTo.add && (
             <p>{companyDetails?.billedTo.add}</p>

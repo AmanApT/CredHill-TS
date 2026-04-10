@@ -51,7 +51,7 @@ const EditClient: FunctionComponent<EditClientProps> = ({ clientDetails }) => {
   const updateClientDetails = async () => {
     try {
       await updateClient({
-        _id: formData?._id,
+        _id: formData?._id as any,
         email: formData?.email,
         clientName: formData?.clientName,
         gst: formData?.gst,

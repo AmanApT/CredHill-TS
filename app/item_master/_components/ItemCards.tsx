@@ -24,18 +24,18 @@ const ItemCards = () => {
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
 
-  const [items, setItems] = useState([]);
-  const [localItems, setLocalItems] = useState(items);
+  const [items, setItems] = useState<any[]>([]);
+  const [localItems, setLocalItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(rowsPerPage);
 
   const getAllItems = async () => {
     const result = await convex.query(api.functions.items.getItems, {
-      email: user?.email,
+      email: user?.email ?? "",
     });
     console.log(result);
-    setItems(result);
+    setItems(result as any);
   };
 
   const searchItem = (e: React.ChangeEvent<HTMLInputElement>) => {

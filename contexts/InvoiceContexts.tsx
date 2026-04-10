@@ -10,18 +10,23 @@ import {
 } from "react";
 
 export interface CompanyDetails {
-  companyName: string;
-  companyAddress: string;
-  gst: string;
-  email: string;
-  phone: string;
+  companyName?: string;
+  companyAddress?: string;
+  gst?: string;
+  gstin?: string;
+  email?: string;
+  phone?: string;
   clientId?: string;
+  clientName?: string;
+  clientOf?: string;
   pan?: string;
   city?: string;
   pincode?: string;
   contact?: string;
   logoUrl?: string;
   stampUrl?: string;
+  add?: string;
+  _id?: string;
 }
 
 export interface TableRow {
@@ -67,10 +72,10 @@ export interface InvoiceContextType {
   setTableRows: Dispatch<SetStateAction<TableRow[]>>;
   includeBankDetails: boolean;
   setIncludeBankDetails: Dispatch<SetStateAction<boolean>>;
-  invoices: [];
-  setInvoices: Dispatch<SetStateAction<[]>>;
-  setItems: Dispatch<SetStateAction<[]>>;
-  items:[]
+  invoices: any[];
+  setInvoices: Dispatch<SetStateAction<any[]>>;
+  setItems: Dispatch<SetStateAction<any[]>>;
+  items: any[];
 }
 const InvoiceContext = createContext<InvoiceContextType | undefined>(undefined);
 
@@ -84,9 +89,13 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
     invoiceStatus: false,
   });
 
-  const [invoices, setInvoices] = useState<[]>();
+  const [invoices, setInvoices] = useState<any[]>([]);
 
-  const [companyDetails, setCompanyDetails] = useState({
+  const [companyDetails, setCompanyDetails] = useState<{
+    billedBy: CompanyDetails;
+    billedTo: CompanyDetails;
+    accountInfo: AccountInfo;
+  }>({
     billedBy: {
       companyName: "",
       email: "",
@@ -140,7 +149,7 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
   ]);
 
   const [includeBankDetails, setIncludeBankDetails] = useState<boolean>(false);
-  const [items, setItems] = useState<[]>([]);
+  const [items, setItems] = useState<any[]>([]);
   return (
     <InvoiceContext.Provider
       value={{

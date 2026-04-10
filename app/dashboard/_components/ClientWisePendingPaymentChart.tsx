@@ -28,7 +28,7 @@ const COLORS = [
 export function ClientWisePendingPaymentChart({ dateRange, selectedClientIds = [] }: ClientWisePendingPaymentChartProps) {
   const { invoices } = useInvoiceContext();
   const [clientData, setClientData] = useState<ClientPendingData[]>([]);
-  const [allClients, setAllClients] = useState([]);
+  const [allClients, setAllClients] = useState<any[]>([]);
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
 

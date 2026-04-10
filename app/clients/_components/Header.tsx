@@ -23,7 +23,7 @@ const Header = () => {
   useEffect(() => {
     setClientDetails((prev) => ({
       ...prev,
-      clientOf: user?.email,
+      clientOf: user?.email ?? "",
     }));
   }, [user]);
   const [clientDetails, setClientDetails] = useState({
@@ -31,7 +31,7 @@ const Header = () => {
     add: "",
     gst: "",
     pan: "",
-    clientOf: user?.email,
+    clientOf: user?.email ?? "",
     city: "",
     pincode: "",
     contact: "",
@@ -62,7 +62,7 @@ const Header = () => {
       add: "",
       gst: "",
       pan: "",
-      clientOf: user?.email,
+      clientOf: user?.email ?? "",
       city: "",
       pincode: "",
       contact: "",
@@ -82,7 +82,7 @@ const Header = () => {
         add: "",
         gst: "",
         pan: "",
-        clientOf: user?.email,
+        clientOf: user?.email ?? "",
         city: "",
         pincode: "",
         contact: "",

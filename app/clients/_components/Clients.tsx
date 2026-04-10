@@ -31,7 +31,7 @@ const Clients = () => {
       email: user?.email ?? "",
     });
     console.log(result);
-    setClients(result);
+    setClients(result as any);
   };
 
   useEffect(() => {

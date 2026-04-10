@@ -90,6 +90,7 @@ const Dashboard = () => {
           referredBy: "",
           date: new Date().toISOString().split("T")[0],
           approvalId: "",
+          invoiceStatus: false,
         })
         setCompanyDetails({
           billedBy: {
@@ -159,15 +160,14 @@ const Dashboard = () => {
 
   const checkUser = async () => {
     const result = await convex.query(api.functions.user.getUser, {
-      email: user?.email,
+      email: user?.email ?? "",
     });
     if (!result.length) {
       addUser({
         companyName: "",
-        email: user?.email,
+        email: user?.email ?? "",
         gst: "",
         pan: "",
-        // name: v.string(),
         add: "",
         city: "",
         pincode: "",
@@ -179,7 +179,7 @@ const Dashboard = () => {
       });
       addAccount({
         bankName: "",
-        email: user?.email,
+        email: user?.email ?? "",
         branch: "",
         ifsc: "",
         accountNo: "",
@@ -192,7 +192,7 @@ const Dashboard = () => {
     }
     if (user?.email !== undefined) {
       getAllInvoices();
-      convex.query(api.functions.clients.getClients, { email: user.email }).then(setAllClients as any);
+      convex.query(api.functions.clients.getClients, { email: user.email ?? "" }).then(setAllClients as any);
     }
   }, [user]);
 
@@ -305,7 +305,7 @@ const Dashboard = () => {
                                   </svg>
                                 )}
                               </span>
-                              <span className={isSelected ? "text-gray-900 font-medium" : "text-gray-600"}>
+                              <span className={`text-left ${isSelected ? "text-gray-900 font-medium" : "text-gray-600"}`}>
                                 {client.clientName}
                               </span>
                             </button>

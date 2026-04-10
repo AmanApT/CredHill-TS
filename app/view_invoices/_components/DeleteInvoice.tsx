@@ -22,7 +22,7 @@ const DeleteInvoice: FunctionComponent<EditItem> = ({ invoiceId }) => {
   const deleteItem = useMutation(api.functions.invoice.deleteInvoice);
   const handleDelete = async (invoiceId: unknown)=>{
     await deleteItem({
-      _id:invoiceId
+      _id: invoiceId as any
     })
     toast("Invoice Deleted")
     // setTimeout(() => {
