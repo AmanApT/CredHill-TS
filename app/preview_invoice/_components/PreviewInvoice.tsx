@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import { api } from "@/convex/_generated/api";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
@@ -8,6 +9,7 @@ import { useMutation, useQuery } from "convex/react";
 import Image from "next/image";
 import moment from "moment";
 import { getPaymentStatusInfo, formatIndianNumber } from "@/lib/invoiceUtils";
+import { parseConfig } from "@/lib/invoiceConfig";
 
 import { useParams } from "next/navigation";
 
@@ -49,6 +51,7 @@ const PRESET_THEMES = [
 const PreviewInvoice = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [theme, setTheme] = useState<InvoiceTheme>(DEFAULT_THEME);
+  const [themeReady, setThemeReady] = useState(false);
   const [showThemePanel, setShowThemePanel] = useState(false);
   const [isSavingTheme, setIsSavingTheme] = useState(false);
 
@@ -59,6 +62,7 @@ const PreviewInvoice = () => {
     tableRows,
     includeBankDetails,
     items,
+    extraFields,
   } = useInvoiceContext();
   const params = useParams<{
     invoiceId: string;
@@ -139,14 +143,24 @@ const PreviewInvoice = () => {
   const { user } = useKindeBrowserClient();
   const addInvoice = useMutation(api.functions.invoice.addInvoice);
   const updateInvoiceData = useMutation(api.functions.invoice.updateInvoice);
+
+  // Invoice config — drives which header fields and table columns render
+  const savedConfig = useQuery(
+    api.functions.invoiceConfig.getConfig,
+    user?.email ? { email: user.email } : "skip"
+  );
+  const config = parseConfig(savedConfig);
   const savePreferencesMutation = useMutation(api.functions.invoicePreferences.savePreferences);
   const savedPrefs = useQuery(
     api.functions.invoicePreferences.getPreferences,
     user?.email ? { email: user.email } : "skip"
   );
 
-  // Load saved preferences on mount
+  // Load saved preferences on mount. Flip `themeReady` in the same pass that
+  // applies the saved colors so the invoice's first paint already uses them —
+  // gating render on the query alone would still show one default-themed frame.
   useEffect(() => {
+    if (savedPrefs === undefined) return; // query still loading
     if (savedPrefs) {
       setTheme({
         primary: savedPrefs.themeColor,
@@ -154,6 +168,8 @@ const PreviewInvoice = () => {
         fontSize: savedPrefs.fontSize as FontSize,
       });
     }
+    // savedPrefs === null → first-time user: keep DEFAULT_THEME
+    setThemeReady(true);
   }, [savedPrefs]);
 
   const handleSaveTheme = async () => {
@@ -210,6 +226,9 @@ const PreviewInvoice = () => {
         tax: (cgst + sgst + igst).toString(),
         invoiceStatus: invoiceFormData?.invoiceStatus ?? false,
         item: JSON.stringify(tableRows),
+        extraFields: Object.keys(extraFields).length
+          ? JSON.stringify(extraFields)
+          : undefined,
       });
       setIsSaved(true);
       toast("Invoice Saved!");
@@ -240,6 +259,9 @@ const PreviewInvoice = () => {
         tax: (cgst + sgst + igst).toString(),
         invoiceStatus: invoiceFormData?.invoiceStatus ?? false,
         item: JSON.stringify(tableRows),
+        extraFields: Object.keys(extraFields).length
+          ? JSON.stringify(extraFields)
+          : undefined,
       });
 
       toast("Invoice Updated!");
@@ -258,10 +280,70 @@ const PreviewInvoice = () => {
     accent: { backgroundColor: theme.accent } as React.CSSProperties,
   };
 
+  // Hold the invoice back until both the saved theme and the field config have
+  // resolved, then fade it in — no flash from default purple → saved color.
+  // A layout-shaped skeleton stands in so the page reads as the same invoice.
+  const ready = themeReady && savedConfig !== undefined;
+  if (!ready) {
+    return (
+      <section className="p-4 bg-white rounded-md animate-in fade-in-0 duration-300">
+        {/* Title */}
+        <Skeleton className="h-8 w-32" />
+
+        {/* Header fields (invoice no / date …) */}
+        <div className="mt-5 flex gap-10">
+          <div className="flex flex-col gap-2.5">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <div className="flex flex-col gap-2.5">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-28" />
+          </div>
+        </div>
+
+        {/* Billed By / Billed To cards */}
+        <div className="mt-8 flex justify-between gap-4">
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className="flex w-[45vw] flex-col gap-2.5 rounded-md bg-gray-50 p-3"
+            >
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-3.5 w-40" />
+              <Skeleton className="h-3.5 w-28" />
+              <Skeleton className="h-3.5 w-44" />
+              <Skeleton className="h-3.5 w-36" />
+            </div>
+          ))}
+        </div>
+
+        {/* Line-item table */}
+        <div className="mt-8">
+          <Skeleton className="h-10 w-full" />
+          <div className="mt-2.5 space-y-2.5">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-8 w-full" />
+            ))}
+          </div>
+        </div>
+
+        {/* Totals */}
+        <div className="mt-8 flex justify-end">
+          <div className="flex w-1/3 flex-col gap-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3 self-end" />
+            <Skeleton className="h-6 w-full" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <>
       {/* ── Invoice content ───────────────────────────────────────────────── */}
-      <section ref={contentRef} className="relative p-4 bg-white rounded-md" style={{ zoom: FONT_ZOOM[theme.fontSize] }}>
+      <section ref={contentRef} className="relative p-4 bg-white rounded-md animate-in fade-in-0 duration-300" style={{ zoom: FONT_ZOOM[theme.fontSize] }}>
 
       {/* ── Theme Card — top-right inside invoice card, never prints ──────── */}
       <div className="no-print absolute top-4 right-4">
@@ -369,24 +451,55 @@ const PreviewInvoice = () => {
 
       <h2 className="text-2xl" style={s.primaryText}>Invoice</h2>
       <div className="mt-4 flex gap-5 text-sm">
-        <div className="text-gray-600 font-semibold  flex flex-col gap-1">
-          <p>Invoice No #</p>
-          <p>Invoice Date</p>
-          {invoiceFormData?.venue && <p>Venue</p>}
-          {invoiceFormData?.approvalId && <p>Approval ID</p>}
-          {invoiceFormData?.referredBy && <p>Order Reffered By</p>}
+        <div className="text-gray-600 font-semibold flex flex-col gap-1">
+          {config.headerFields
+            .filter((f) => {
+              if (!f.visible) return false;
+              if (f.key === "invoiceNo" || f.key === "date") return true;
+              // Only show optional fields if they have a value
+              const formKey = f.key === "ref" ? "referredBy" : f.key;
+              return !!(invoiceFormData as any)?.[formKey];
+            })
+            .map((f) => (
+              <p key={f.key}>{f.label}</p>
+            ))}
+          {config.customHeaderFields
+            .filter((f) => !!extraFields?.[f.key])
+            .map((f) => (
+              <p key={f.key}>{f.label}</p>
+            ))}
         </div>
         <div className="flex flex-col font-semibold gap-1">
-          <div>
-            <p>{invoiceFormData?.invoiceNo}</p>
-          </div>
-          <p>
-            {moment(invoiceFormData?.date).format("DD/MM/YYYY")}
-            {/* {invoiceFormData?.date} */}
-          </p>
-          {invoiceFormData?.venue && <p>{invoiceFormData?.venue}</p>}
-          {invoiceFormData?.approvalId && <p>{invoiceFormData?.approvalId}</p>}
-          {invoiceFormData?.referredBy && <p>{invoiceFormData?.referredBy}</p>}
+          {config.headerFields
+            .filter((f) => {
+              if (!f.visible) return false;
+              if (f.key === "invoiceNo" || f.key === "date") return true;
+              const formKey = f.key === "ref" ? "referredBy" : f.key;
+              return !!(invoiceFormData as any)?.[formKey];
+            })
+            .map((f) => {
+              if (f.key === "date") {
+                return (
+                  <p key={f.key}>
+                    {moment(invoiceFormData?.date).format("DD/MM/YYYY")}
+                  </p>
+                );
+              }
+              const formKey = f.key === "ref" ? "referredBy" : f.key;
+              return <p key={f.key}>{(invoiceFormData as any)?.[formKey]}</p>;
+            })}
+          {config.customHeaderFields
+            .filter((f) => !!extraFields?.[f.key])
+            .map((f) => {
+              const val = extraFields[f.key];
+              return (
+                <p key={f.key}>
+                  {f.type === "date" && val
+                    ? moment(val).format("DD/MM/YYYY")
+                    : val}
+                </p>
+              );
+            })}
         </div>
       </div>
 
@@ -489,63 +602,97 @@ const PreviewInvoice = () => {
           <thead style={s.primary}>
             <tr className="text-xs">
               <th className="rounded-tl-md "></th>
-              <th id="itemCol" className="text-left p-2 w-[9rem] ">
-                Item
-              </th>
-              <th className="w-[3rem]">GST Rate</th>
-              <th>Date</th>
-              <th className="">Description</th>
-              <th>Quantity</th>
-              <th>Rate</th>
-              <th>Amount</th>
-              {companyDetails?.billedTo?.gst?.substring(0, 2) == "07" ? (
-                <>
-                  <th>CGST</th>
-                  <th>SGST</th>
-                </>
-              ) : (
-                <th>IGST</th>
-              )}
-
-              <th className="rounded-tr-md">Total</th>
+              {(() => {
+                const sellerState = (companyDetails?.billedBy?.gstin || companyDetails?.billedBy?.gst)?.substring(0, 2);
+                const buyerState = companyDetails?.billedTo?.gst?.substring(0, 2);
+                const isLocalGST = !!(sellerState && buyerState && sellerState === buyerState);
+                const visibleCols = config.tableColumns.filter((col) => {
+                  if (!col.visible) return false;
+                  if (col.key === "cgst" || col.key === "sgst") return isLocalGST;
+                  if (col.key === "igst") return !isLocalGST;
+                  if (col.key === "hsn") return false; // shown inline under Item
+                  return true;
+                });
+                return visibleCols.map((col, idx) => (
+                  <th
+                    key={col.key}
+                    className={`${col.key === "item" ? "text-left p-2 w-[9rem]" : ""} ${
+                      idx === visibleCols.length - 1 ? "rounded-tr-md" : ""
+                    }`}
+                  >
+                    {col.label}
+                  </th>
+                ));
+              })()}
             </tr>
           </thead>
           <tbody>
-            {tableRows.map((row, idx) => (
-              <tr
-                className="text-center text-xs"
-                style={idx % 2 === 0 ? s.accent : { backgroundColor: "#fff" }}
-                key={idx}
-              >
-                <td className="  p-2 py-3">{idx + 1}</td>
-                <td className="text-left">
-                  <p>{row.item}</p>
-                  <p className="text-[0.5rem]">HSN/SAC: {getHsn(row.item)}</p>
-                </td>
-                <td>{row.gstRate}</td>
-                <td>
-                  {moment(row.date).format("DD/MM/YYYY")}
-                  {/* {row.date} */}
-                </td>
-                <td className="break-words  whitespace-normal">
-                  {row.description}
-                </td>
-                <td className="">{row.quantity}</td>
-                <td>{formatIndianNumber(row.rate)}</td>
-                <td>{formatIndianNumber(row.amount)}</td>
-                {companyDetails?.billedTo?.gst?.substring(0, 2) == "07" ? (
-                  <>
-                    {" "}
-                    <td className="">{formatIndianNumber(row.cgst)}</td>
-                    <td className="">{formatIndianNumber(row.sgst)}</td>
-                  </>
-                ) : (
-                  <td>{formatIndianNumber(row.igst)}</td>
-                )}
+            {tableRows.map((row, idx) => {
+              const sellerState = (companyDetails?.billedBy?.gstin || companyDetails?.billedBy?.gst)?.substring(0, 2);
+              const buyerState = companyDetails?.billedTo?.gst?.substring(0, 2);
+              const isLocalGST = !!(sellerState && buyerState && sellerState === buyerState);
+              const visibleCols = config.tableColumns.filter((col) => {
+                if (!col.visible) return false;
+                if (col.key === "cgst" || col.key === "sgst") return isLocalGST;
+                if (col.key === "igst") return !isLocalGST;
+                if (col.key === "hsn") return false;
+                return true;
+              });
+              const hsnVisible = config.tableColumns.find(
+                (c) => c.key === "hsn"
+              )?.visible;
 
-                <td>{formatIndianNumber(row.total)}</td>
-              </tr>
-            ))}
+              return (
+                <tr
+                  className="text-center text-xs"
+                  style={idx % 2 === 0 ? s.accent : { backgroundColor: "#fff" }}
+                  key={idx}
+                >
+                  <td className="p-2 py-3">{idx + 1}</td>
+                  {visibleCols.map((col) => {
+                    if (col.key === "item") {
+                      return (
+                        <td key={col.key} className="text-left">
+                          <p>{row.item}</p>
+                          {hsnVisible && (
+                            <p className="text-[0.5rem]">
+                              HSN/SAC: {getHsn(row.item)}
+                            </p>
+                          )}
+                        </td>
+                      );
+                    }
+                    if (col.key === "gstRate") return <td key={col.key}>{row.gstRate}</td>;
+                    if (col.key === "date")
+                      return (
+                        <td key={col.key}>
+                          {moment(row.date).format("DD/MM/YYYY")}
+                        </td>
+                      );
+                    if (col.key === "description")
+                      return (
+                        <td key={col.key} className="break-words whitespace-normal">
+                          {row.description}
+                        </td>
+                      );
+                    if (col.key === "quantity") return <td key={col.key}>{row.quantity}</td>;
+                    if (col.key === "rate")
+                      return <td key={col.key}>{formatIndianNumber(row.rate)}</td>;
+                    if (col.key === "amount")
+                      return <td key={col.key}>{formatIndianNumber(row.amount)}</td>;
+                    if (col.key === "cgst")
+                      return <td key={col.key}>{formatIndianNumber(row.cgst)}</td>;
+                    if (col.key === "sgst")
+                      return <td key={col.key}>{formatIndianNumber(row.sgst)}</td>;
+                    if (col.key === "igst")
+                      return <td key={col.key}>{formatIndianNumber(row.igst)}</td>;
+                    if (col.key === "total")
+                      return <td key={col.key}>{formatIndianNumber(row.total)}</td>;
+                    return <td key={col.key}>—</td>;
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
@@ -581,25 +728,35 @@ const PreviewInvoice = () => {
             <div className="mt-4 flex justify-between ">
               <div className=" flex flex-col gap-2">
                 <p>Amount</p>
-                {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
-                  <>
-                    <p>CGST</p>
-                    <p>SGST</p>
-                  </>
-                ) : (
-                  <p>IGST</p>
-                )}
+                {(() => {
+                  const sellerState = (companyDetails?.billedBy?.gstin || companyDetails?.billedBy?.gst)?.substring(0, 2);
+                  const buyerState = companyDetails?.billedTo?.gst?.substring(0, 2);
+                  const isLocal = !!(sellerState && buyerState && sellerState === buyerState);
+                  return isLocal ? (
+                    <>
+                      <p>CGST</p>
+                      <p>SGST</p>
+                    </>
+                  ) : (
+                    <p>IGST</p>
+                  );
+                })()}
               </div>
               <div className="flex flex-col gap-2 text-right">
                 <p>₹{formatIndianNumber(amount, true)}</p>
-                {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
-                  <>
-                    <p>₹{formatIndianNumber(cgst, true)} </p>
-                    <p>₹{formatIndianNumber(sgst, true)}</p>
-                  </>
-                ) : (
-                  <p>₹ {formatIndianNumber(igst, true)}</p>
-                )}
+                {(() => {
+                  const sellerState = (companyDetails?.billedBy?.gstin || companyDetails?.billedBy?.gst)?.substring(0, 2);
+                  const buyerState = companyDetails?.billedTo?.gst?.substring(0, 2);
+                  const isLocal = !!(sellerState && buyerState && sellerState === buyerState);
+                  return isLocal ? (
+                    <>
+                      <p>₹{formatIndianNumber(cgst, true)} </p>
+                      <p>₹{formatIndianNumber(sgst, true)}</p>
+                    </>
+                  ) : (
+                    <p>₹ {formatIndianNumber(igst, true)}</p>
+                  );
+                })()}
               </div>
             </div>
             <hr className="mt-4 border border-black" />

@@ -15,9 +15,13 @@ import type {
 } from "convex/server";
 import type * as functions_account from "../functions/account.js";
 import type * as functions_clients from "../functions/clients.js";
+import type * as functions_conversion from "../functions/conversion.js";
 import type * as functions_invoice from "../functions/invoice.js";
+import type * as functions_invoiceConfig from "../functions/invoiceConfig.js";
 import type * as functions_invoicePreferences from "../functions/invoicePreferences.js";
 import type * as functions_items from "../functions/items.js";
+import type * as functions_proforma from "../functions/proforma.js";
+import type * as functions_quotation from "../functions/quotation.js";
 import type * as functions_user from "../functions/user.js";
 
 /**
@@ -31,9 +35,13 @@ import type * as functions_user from "../functions/user.js";
 declare const fullApi: ApiFromModules<{
   "functions/account": typeof functions_account;
   "functions/clients": typeof functions_clients;
+  "functions/conversion": typeof functions_conversion;
   "functions/invoice": typeof functions_invoice;
+  "functions/invoiceConfig": typeof functions_invoiceConfig;
   "functions/invoicePreferences": typeof functions_invoicePreferences;
   "functions/items": typeof functions_items;
+  "functions/proforma": typeof functions_proforma;
+  "functions/quotation": typeof functions_quotation;
   "functions/user": typeof functions_user;
 }>;
 export declare const api: FilterApi<

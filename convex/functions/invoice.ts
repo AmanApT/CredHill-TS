@@ -27,6 +27,7 @@ export const addInvoice = mutation({
     tax: v.string(),
     invoiceStatus: v.boolean(),
     item: v.string(),
+    extraFields: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Uniqueness check: ensure invoice number doesn't already exist for this user
@@ -60,6 +61,7 @@ export const updateInvoice = mutation({
     tax: v.optional(v.string()),
     invoiceStatus: v.optional(v.boolean()),
     item: v.optional(v.string()),
+    extraFields: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
    return await ctx.db.patch(args._id,{
@@ -75,6 +77,7 @@ export const updateInvoice = mutation({
     tax: args.tax,
     invoiceStatus: args.invoiceStatus,
     item: args.item,
+    extraFields: args.extraFields,
    })
   },
 });

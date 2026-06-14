@@ -13,11 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/convex/_generated/api";
-import { useConvex } from "convex/react";
+import { useConvex, useQuery } from "convex/react";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { DEFAULT_CONFIG, parseConfig } from "@/lib/invoiceConfig";
 
 import { MdAdd, MdAddBox, MdDelete } from "react-icons/md";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
 
@@ -49,11 +51,20 @@ const InvoiceForm: React.FC = () => {
     invoices,
     items,
     setItems,
+    extraFields,
+    setExtraFields,
   } = useInvoiceContext();
   console.log(invoices, "allInvoices");
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
   const [clients, setClients] = useState<any[]>([]);
+
+  // Invoice config (extraFields comes from context)
+  const savedConfig = useQuery(
+    api.functions.invoiceConfig.getConfig,
+    user?.email ? { email: user.email } : "skip"
+  );
+  const config = parseConfig(savedConfig);
 
   const getAllItems = async () => {
     const result = await convex.query(api.functions.items.getItems, {
@@ -101,6 +112,17 @@ const InvoiceForm: React.FC = () => {
       }));
 
       setTableRows(JSON?.parse(foundInvoice?.item));
+
+      // Load extra (custom) field values if present
+      if (foundInvoice?.extraFields) {
+        try {
+          setExtraFields(JSON.parse(foundInvoice.extraFields));
+        } catch {
+          setExtraFields({});
+        }
+      } else {
+        setExtraFields({});
+      }
     }
   }, [
     clients,
@@ -326,8 +348,9 @@ const InvoiceForm: React.FC = () => {
                     field === "quantity" ? Number(value) : tableRow.quantity;
                   const rate = field === "rate" ? Number(value) : tableRow.rate;
                   const amount = quantity * rate;
-                  const isLocalGST =
-                    companyDetails?.billedTo?.gst?.substring(0, 2) === "07";
+                  const sellerState = (companyDetails?.billedBy?.gstin || companyDetails?.billedBy?.gst)?.substring(0, 2);
+                  const buyerState = companyDetails?.billedTo?.gst?.substring(0, 2);
+                  const isLocalGST = !!(sellerState && buyerState && sellerState === buyerState);
                   const gstRate = tableRow.gstRate;
 
                   return {
@@ -354,80 +377,142 @@ const InvoiceForm: React.FC = () => {
   ) => {
     setInvoiceFormData({ ...invoiceFormData, [field]: e.target.value });
   };
+
+  // Wait for the saved layout before rendering: parseConfig falls back to
+  // DEFAULT_CONFIG while `savedConfig` is undefined, which would briefly show
+  // the default fields/columns before the user's customized ones snap in.
+  // A form-shaped skeleton stands in so the layout doesn't jump on load.
+  if (savedConfig === undefined) {
+    return (
+      <div className="m-4 p-6 mx-auto bg-white shadow-lg rounded-md animate-in fade-in-0 duration-300">
+        {/* Header fields */}
+        <div className="space-y-3">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center gap-4">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-9 w-48" />
+            </div>
+          ))}
+        </div>
+
+        {/* Billed By / Billed To */}
+        <div className="mt-8 flex justify-between gap-6">
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className="flex flex-1 flex-col gap-3 rounded-md bg-slate-50 p-4"
+            >
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-28 w-full" />
+            </div>
+          ))}
+        </div>
+
+        {/* Invoice items */}
+        <div className="mt-8">
+          <Skeleton className="mb-4 h-6 w-40" />
+          <Skeleton className="h-12 w-full" />
+          <div className="mt-2.5 space-y-2.5">
+            {[0, 1].map((i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="m-4 p-6  mx-auto bg-white shadow-lg rounded-md ">
+    <div className="m-4 p-6  mx-auto bg-white shadow-lg rounded-md animate-in fade-in-0 duration-300">
       <div className="space-y-2">
-        <div className="flex items-center">
-          <span className="w-32 ">
-            Invoice No <span className="text-red-600">*</span>{" "}
-          </span>
-          {params?.invoiceId !== undefined ? (
-            // Edit mode: show full stored invoice number as read-only
-            <span className="mt-1 border-0 border-b-[1.2px] block p-2 min-w-[8rem] text-gray-700">
-              {invoiceFormData.invoiceNo}
-            </span>
-          ) : (
-            // Create mode: dynamic FY prefix (read-only) + editable numeric suffix
-            <>
-              <span className="mt-1 border-0 border-b-[1.2px] block p-2 text-gray-700 select-none">
-                {getIndianFY()}/
-              </span>
-              <input
-                type="text"
-                value={invoiceFormData.invoiceNo}
-                onChange={(e) => handleInputChange(e, undefined, "invoiceNo")}
-                className="mt-1 border-0 border-b-[1.2px] block w-32 p-2 pl-0 focus:outline-none"
-                placeholder="001"
-              />
-            </>
-          )}
-        </div>
-        <div>
-          <div className="flex items-center">
-            <span className="w-32">Venue </span>
+        {config.headerFields
+          .filter((f) => f.visible)
+          .map((field) => {
+            // Map config key -> invoiceFormData key (ref is stored as referredBy in the form)
+            const formKey = field.key === "ref" ? "referredBy" : field.key;
+            const value = (invoiceFormData as any)?.[formKey] ?? "";
+            const isRequired = field.required;
+
+            // Special render: invoice number (FY prefix + numeric suffix in create mode)
+            if (field.key === "invoiceNo") {
+              return (
+                <div key={field.key} className="flex items-center">
+                  <span className="w-32">
+                    {field.label}
+                    {isRequired && <span className="text-red-600"> *</span>}
+                  </span>
+                  {params?.invoiceId !== undefined ? (
+                    <span className="mt-1 border-0 border-b-[1.2px] block p-2 min-w-[8rem] text-gray-700">
+                      {invoiceFormData.invoiceNo}
+                    </span>
+                  ) : (
+                    <>
+                      <span className="mt-1 border-0 border-b-[1.2px] block p-2 text-gray-700 select-none">
+                        {getIndianFY()}/
+                      </span>
+                      <input
+                        type="text"
+                        value={invoiceFormData.invoiceNo}
+                        onChange={(e) => handleInputChange(e, undefined, "invoiceNo")}
+                        className="mt-1 border-0 border-b-[1.2px] block w-32 p-2 pl-0 focus:outline-none"
+                        placeholder="001"
+                      />
+                    </>
+                  )}
+                </div>
+              );
+            }
+
+            // Date field
+            if (field.key === "date") {
+              return (
+                <div key={field.key} className="flex items-center">
+                  <span className="w-32">
+                    {field.label}
+                    {isRequired && <span className="text-red-600"> *</span>}
+                  </span>
+                  <input
+                    type="date"
+                    value={invoiceFormData.date}
+                    onChange={(e) => handleInputChange(e, undefined, "date")}
+                    className="mt-1 block w-48 p-2 focus:outline-none border-0 border-b-[1.2px]"
+                  />
+                </div>
+              );
+            }
+
+            // Generic text field for other core fields (venue, approvalId, ref)
+            return (
+              <div key={field.key} className="flex items-center">
+                <span className="w-32">{field.label}</span>
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => handleInputChange(e, undefined, formKey)}
+                  className="mt-1 block w-48 p-2 focus:outline-none border-b-[1.2px]"
+                />
+              </div>
+            );
+          })}
+
+        {/* Custom (user-defined) header fields */}
+        {config.customHeaderFields.map((field) => (
+          <div key={field.key} className="flex items-center">
+            <span className="w-32">{field.label}</span>
             <input
-              type="text"
-              value={invoiceFormData.venue}
-              onChange={(e) => handleInputChange(e, undefined, "venue")}
+              type={field.type}
+              value={extraFields[field.key] ?? ""}
+              onChange={(e) =>
+                setExtraFields((prev) => ({
+                  ...prev,
+                  [field.key]: e.target.value,
+                }))
+              }
               className="mt-1 block w-48 p-2 focus:outline-none border-b-[1.2px]"
             />
           </div>
-        </div>
-        <div>
-          <div className="flex items-center">
-            <span className="w-32">Approval ID </span>
-            <input
-              type="text"
-              value={invoiceFormData.approvalId}
-              onChange={(e) => handleInputChange(e, undefined, "approvalId")}
-              className="mt-1 block w-48 p-2 focus:outline-none border-b-[1.2px]"
-            />
-          </div>
-        </div>
-        <div>
-          <div className="flex items-center">
-            <span className="w-32">Order Ref </span>
-            <input
-              type="text"
-              value={invoiceFormData.referredBy}
-              onChange={(e) => handleInputChange(e, undefined, "referredBy")}
-              className="mt-1 block w-48 p-2 focus:outline-none border-b-[1.2px]"
-            />
-          </div>
-        </div>
-        <div>
-          <div className="flex items-center">
-            <span className="w-32">
-              Date <span className="text-red-600">*</span>{" "}
-            </span>
-            <input
-              type="date"
-              value={invoiceFormData.date}
-              onChange={(e) => handleInputChange(e, undefined, "date")}
-              className="mt-1 block w-48 p-2 focus:outline-none border-0 border-b-[1.2px]"
-            />
-          </div>
-        </div>
+        ))}
       </div>
 
       <div className="flex  justify-between  mt-8">
@@ -562,197 +647,229 @@ const InvoiceForm: React.FC = () => {
           <table className="w-full text-sm text-left rtl:text-right text-black dark:text-gray-400">
             <thead className="text-xs  uppercase bg-purple-600 text-white ">
               <tr>
-                <th scope="col" className="px-6 py-3 ">
-                  Item name
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  GST Rate
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Date
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Description
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Quantity
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Rate
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Amount
-                </th>
-                {companyDetails?.billedTo?.gst?.substring(0, 2) == "07" ? (
-                  <>
-                    <th scope="col" className="px-6 py-3">
-                      CGST
+                {config.tableColumns
+                  .filter((col) => {
+                    if (!col.visible) return false;
+                    // GST columns auto-swap based on client state
+                    const sellerState = (companyDetails?.billedBy?.gstin || companyDetails?.billedBy?.gst)?.substring(0, 2);
+                    const buyerState = companyDetails?.billedTo?.gst?.substring(0, 2);
+                    const isLocalGST = !!(sellerState && buyerState && sellerState === buyerState);
+                    if (col.key === "cgst" || col.key === "sgst") return isLocalGST;
+                    if (col.key === "igst") return !isLocalGST;
+                    // HSN is rendered inside the Item cell, not as its own column
+                    if (col.key === "hsn") return false;
+                    return true;
+                  })
+                  .map((col) => (
+                    <th key={col.key} scope="col" className="px-6 py-3">
+                      {col.label}
                     </th>
-                    <th scope="col" className="px-6 py-3">
-                      SGST
-                    </th>
-                  </>
-                ) : (
-                  <th scope="col" className="px-6 py-3">
-                    IGST
-                  </th>
-                )}
-
-                <th scope="col" className="px-6 py-3">
-                  Total
-                </th>
+                  ))}
                 <th scope="col" className="px-6 py-3">
                   Action
                 </th>
               </tr>
             </thead>
             <tbody>
-              {tableRows?.map((row, index) => (
-                <tr
-                  key={index}
-                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-                >
-                  <th
-                    scope="row"
-                    className="px-3 py-4  font-medium text-black-900 whitespace-nowrap dark:text-white"
+              {tableRows?.map((row, index) => {
+                const sellerState = (companyDetails?.billedBy?.gstin || companyDetails?.billedBy?.gst)?.substring(0, 2);
+                const buyerState = companyDetails?.billedTo?.gst?.substring(0, 2);
+                const isLocalGST = !!(sellerState && buyerState && sellerState === buyerState);
+                const visibleCols = config.tableColumns.filter((col) => {
+                  if (!col.visible) return false;
+                  if (col.key === "cgst" || col.key === "sgst") return isLocalGST;
+                  if (col.key === "igst") return !isLocalGST;
+                  if (col.key === "hsn") return false;
+                  return true;
+                });
+
+                return (
+                  <tr
+                    key={index}
+                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
-                    {/* <Input
-                      placeholder="Item Name"
-                      value={row.item}
-                      onChange={(e) =>
-                        handleChange(index, "item", e.target.value)
-                      }
-                      className="w-40"
-                    /> */}
-                    <Popover
-                      open={openStates[index] || false}
-                      onOpenChange={(isOpen) => toggleOpenState(index, isOpen)}
-                    >
-                      <PopoverTrigger asChild>
-                        
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={openStates[index] || false}
-                          className="w-[200px] justify-between text-ellipsis overflow-hidden whitespace-nowrap"
-                        >
-                          <span className="truncate">
-                            {row.item
-                              ? items.find(
-                                  (item) => item.itemName === row.item
-                                )?.itemName || "Choose Items"
-                              : "Choose Items"}
-                          </span>
-
-                          <ChevronsUpDown className="opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[200px] p-0">
-                        <Command>
-                          <CommandInput
-                            placeholder="Choose Item"
-                            className="h-9"
-                          />
-                          <CommandList>
-                            <CommandEmpty>No items !</CommandEmpty>
-                            <CommandGroup>
-                              {items.map((item, id) => (
-                                <CommandItem
-                                  key={id}
-                                  value={item.itemName}
-                                  onSelect={(currentValue) => {
-                                    const selectedItem = items.find(
-                                      (item) => item.itemName === currentValue
-                                    );
-                                    handleChange(index, "item", item.itemName);
-                                    // handleChange(index, "hsn", selectedItem?.hsn);
-
-                                    toggleOpenState(index, false); // Close combobox after selection
-                                  }}
+                    {visibleCols.map((col) => {
+                      if (col.key === "item") {
+                        return (
+                          <td
+                            key={col.key}
+                            className="px-3 py-4 font-medium text-black-900 whitespace-nowrap dark:text-white"
+                          >
+                            <Popover
+                              open={openStates[index] || false}
+                              onOpenChange={(isOpen) =>
+                                toggleOpenState(index, isOpen)
+                              }
+                            >
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  aria-expanded={openStates[index] || false}
+                                  className="w-[200px] justify-between text-ellipsis overflow-hidden whitespace-nowrap"
                                 >
-                                  {item.itemName}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                  </th>
-                  <td className="px-3 py-4">
-                    <Input
-                      placeholder="GST "
-                      value={row.gstRate}
-                      onChange={(e) => {
-                        handleChange(index, "gstRate", Number(e.target.value));
-                        // calculateTotalSums()
-                      }}
-                      className="w-16"
-                    />
-                  </td>
-                  <td className="px-3 py-4">
-                    <Input
-                      placeholder="Date"
-                      value={row.date}
-                      onChange={(e) =>
-                        handleChange(index, "date", e.target.value)
+                                  <span className="truncate">
+                                    {row.item
+                                      ? items.find(
+                                          (item) => item.itemName === row.item
+                                        )?.itemName || "Choose Items"
+                                      : "Choose Items"}
+                                  </span>
+                                  <ChevronsUpDown className="opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[200px] p-0">
+                                <Command>
+                                  <CommandInput
+                                    placeholder="Choose Item"
+                                    className="h-9"
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>No items !</CommandEmpty>
+                                    <CommandGroup>
+                                      {items.map((item, id) => (
+                                        <CommandItem
+                                          key={id}
+                                          value={item.itemName}
+                                          onSelect={(currentValue) => {
+                                            handleChange(
+                                              index,
+                                              "item",
+                                              item.itemName
+                                            );
+                                            toggleOpenState(index, false);
+                                          }}
+                                        >
+                                          {item.itemName}
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
+                          </td>
+                        );
                       }
-                      className="w-36"
-                      type="date"
-                    />
-                  </td>
-                  <td className="px-3 py-4">
-                    {" "}
-                    <Input
-                      placeholder="Description"
-                      value={row.description}
-                      onChange={(e) =>
-                        handleChange(index, "description", e.target.value)
+                      if (col.key === "gstRate") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            <Input
+                              placeholder="GST"
+                              value={row.gstRate}
+                              onChange={(e) =>
+                                handleChange(index, "gstRate", Number(e.target.value))
+                              }
+                              className="w-16"
+                            />
+                          </td>
+                        );
                       }
-                      className="w-48"
-                    />
-                  </td>
-                  <td className="px-3 py-4">
-                    <Input
-                      value={row.quantity}
-                      onChange={(e) =>
-                        handleChange(index, "quantity", Number(e.target.value))
+                      if (col.key === "date") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            <Input
+                              placeholder="Date"
+                              value={row.date}
+                              onChange={(e) =>
+                                handleChange(index, "date", e.target.value)
+                              }
+                              className="w-36"
+                              type="date"
+                            />
+                          </td>
+                        );
                       }
-                      className="w-16"
-                      type="number"
-                    />
-                  </td>
-                  <td className="px-3 py-4">
-                    <Input
-                      value={row.rate}
-                      onChange={(e) =>
-                        handleChange(index, "rate", Number(e.target.value))
+                      if (col.key === "description") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            <Input
+                              placeholder="Description"
+                              value={row.description}
+                              onChange={(e) =>
+                                handleChange(index, "description", e.target.value)
+                              }
+                              className="w-48"
+                            />
+                          </td>
+                        );
                       }
-                      className="w-24"
-                      type="number"
-                    />
-                  </td>
-                  <td className="px-3 py-4">{row.amount.toFixed(2)}</td>
-                  {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
-                    <>
-                      <td className="px-3 py-4">{row.cgst.toFixed(2)}</td>
-                      <td className="px-3 py-4">{row.sgst.toFixed(2)}</td>
-                    </>
-                  ) : (
-                    <td className="px-3 py-4">{row.igst.toFixed(2)}</td>
-                  )}
-
-                  <td className="px-3 py-4">{row.total.toFixed(2)}</td>
-                  <td className="px-3 py-4 text-black">
-                    <button
-                      onClick={() => deleteRow(index)}
-                      className="text-black hover:underline flex "
-                    >
-                      <MdDelete size={20} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      if (col.key === "quantity") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            <Input
+                              value={row.quantity}
+                              onChange={(e) =>
+                                handleChange(index, "quantity", Number(e.target.value))
+                              }
+                              className="w-16"
+                              type="number"
+                            />
+                          </td>
+                        );
+                      }
+                      if (col.key === "rate") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            <Input
+                              value={row.rate}
+                              onChange={(e) =>
+                                handleChange(index, "rate", Number(e.target.value))
+                              }
+                              className="w-24"
+                              type="number"
+                            />
+                          </td>
+                        );
+                      }
+                      if (col.key === "amount") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            {row.amount.toFixed(2)}
+                          </td>
+                        );
+                      }
+                      if (col.key === "cgst") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            {row.cgst.toFixed(2)}
+                          </td>
+                        );
+                      }
+                      if (col.key === "sgst") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            {row.sgst.toFixed(2)}
+                          </td>
+                        );
+                      }
+                      if (col.key === "igst") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            {row.igst.toFixed(2)}
+                          </td>
+                        );
+                      }
+                      if (col.key === "total") {
+                        return (
+                          <td key={col.key} className="px-3 py-4">
+                            {row.total.toFixed(2)}
+                          </td>
+                        );
+                      }
+                      return <td key={col.key} className="px-3 py-4">—</td>;
+                    })}
+                    <td className="px-3 py-4 text-black">
+                      <button
+                        onClick={() => deleteRow(index)}
+                        className="text-black hover:underline flex"
+                      >
+                        <MdDelete size={20} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -833,25 +950,35 @@ const InvoiceForm: React.FC = () => {
           <div className="mt-4 flex justify-between ">
             <div className=" flex flex-col gap-2 ">
               <p>Amount</p>
-              {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
-                <>
-                  <p>CGST</p>
-                  <p>SGST</p>
-                </>
-              ) : (
-                <p>IGST</p>
-              )}
+              {(() => {
+                const sellerState = (companyDetails?.billedBy?.gstin || companyDetails?.billedBy?.gst)?.substring(0, 2);
+                const buyerState = companyDetails?.billedTo?.gst?.substring(0, 2);
+                const isLocal = !!(sellerState && buyerState && sellerState === buyerState);
+                return isLocal ? (
+                  <>
+                    <p>CGST</p>
+                    <p>SGST</p>
+                  </>
+                ) : (
+                  <p>IGST</p>
+                );
+              })()}
             </div>
             <div className="flex flex-col gap-2 text-right">
               <p>₹ {amount.toFixed(2)}</p>
-              {companyDetails?.billedTo?.gst?.substring(0, 2) === "07" ? (
+              {(() => {
+                const sellerState = (companyDetails?.billedBy?.gstin || companyDetails?.billedBy?.gst)?.substring(0, 2);
+                const buyerState = companyDetails?.billedTo?.gst?.substring(0, 2);
+                const isLocal = !!(sellerState && buyerState && sellerState === buyerState);
+                return isLocal ? (
                 <>
                   <p>₹ {cgst.toFixed(2)} </p>
                   <p>₹ {sgst.toFixed(2)}</p>
                 </>
-              ) : (
-                <p>₹ {igst.toFixed(2)}</p>
-              )}
+                ) : (
+                  <p>₹ {igst.toFixed(2)}</p>
+                );
+              })()}
             </div>
           </div>
           <hr className="mt-4 border border-black" />

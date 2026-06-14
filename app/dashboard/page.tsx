@@ -15,6 +15,9 @@ import { ClientWiseRevenueChart } from "./_components/ClientWiseRevenueChart";
 import { ClientWisePendingPaymentChart } from "./_components/ClientWisePendingPaymentChart";
 import { RevenueTimelineChart } from "./_components/RevenueTimelineChart";
 import { RecentInvoices } from "./_components/RecentInvoices";
+import { DocumentSummaryCards } from "./_components/DocumentSummaryCards";
+import { DocumentStatusChart } from "./_components/DocumentStatusChart";
+import { RecentDocuments } from "./_components/RecentDocuments";
 import { DateRangeFilter } from "./_components/DateRangeFilter";
 import { useInvoiceContext } from "@/contexts/InvoiceContexts";
 import { usePathname } from 'next/navigation'
@@ -23,7 +26,7 @@ import { Calendar, ChevronDown, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import moment from "moment";
 
-type ChartKey = "timeline" | "clientInvoices" | "pendingInvoices" | "clientRevenue" | "clientPending" | "recentActivity";
+type ChartKey = "timeline" | "clientInvoices" | "pendingInvoices" | "clientRevenue" | "clientPending" | "recentActivity" | "quotationStatus" | "proformaStatus" | "recentQuotations" | "recentProformas";
 
 interface ChartOption {
   key: ChartKey;
@@ -37,6 +40,10 @@ const ALL_CHARTS: ChartOption[] = [
   { key: "clientRevenue", label: "Client-Wise Revenue" },
   { key: "clientPending", label: "Client-Wise Pending Payment" },
   { key: "recentActivity", label: "Recent Activity" },
+  { key: "quotationStatus", label: "Quotation Status & Acceptance" },
+  { key: "proformaStatus", label: "Proforma Status & Conversion" },
+  { key: "recentQuotations", label: "Recent Quotations" },
+  { key: "recentProformas", label: "Recent Proformas" },
 ];
 
 const Dashboard = () => {
@@ -51,6 +58,9 @@ const Dashboard = () => {
   const [allClients, setAllClients] = useState<{ _id: string; clientName: string }[]>([]);
   const [selectedClientIds, setSelectedClientIds] = useState<string[]>([]);
   const [showClientFilter, setShowClientFilter] = useState(false);
+  const [showInvoiceSummary, setShowInvoiceSummary] = useState(true);
+  const [showQuotationSummary, setShowQuotationSummary] = useState(true);
+  const [showProformaSummary, setShowProformaSummary] = useState(true);
 
   const toggleChart = (key: ChartKey) => {
     setSelectedCharts((prev) => {
@@ -80,7 +90,7 @@ const Dashboard = () => {
   };
 
 
-  const {setInvoiceFormData,setCompanyDetails,setTableRows, invoices} = useInvoiceContext();
+  const {setInvoiceFormData,setCompanyDetails,setTableRows, invoices, setExtraFields} = useInvoiceContext();
 
   useEffect(() => {
     if (pathname.includes('dashboard')) {
@@ -140,9 +150,10 @@ const Dashboard = () => {
           igst: 0,
           total: 0,
         },])
+        setExtraFields({})
     }
 }, [pathname]);
-  const { setInvoices } = useInvoiceContext()
+  const { setInvoices, setQuotations, setProformas } = useInvoiceContext()
   const { user } = useKindeBrowserClient();
   // const [invoices, setInvoices] = useState<[]>();
   const convex = useConvex();
@@ -193,6 +204,8 @@ const Dashboard = () => {
     if (user?.email !== undefined) {
       getAllInvoices();
       convex.query(api.functions.clients.getClients, { email: user.email ?? "" }).then(setAllClients as any);
+      convex.query(api.functions.quotation.getQuotations, { email: user.email ?? "" }).then(setQuotations as any);
+      convex.query(api.functions.proforma.getProformas, { email: user.email ?? "" }).then(setProformas as any);
     }
   }, [user]);
 
@@ -211,9 +224,37 @@ const Dashboard = () => {
       {/* Main Dashboard Container */}
       <div className="px-4 py-2">
         {/* Summary Cards - Top */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="section-heading text-gray-900">Invoice Summary</h2>
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <h2 className="section-heading text-gray-900">Summaries</h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button
+                  variant={showInvoiceSummary ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowInvoiceSummary(!showInvoiceSummary)}
+                  className="text-xs"
+                >
+                  Invoice {showInvoiceSummary ? "✓" : ""}
+                </Button>
+                <Button
+                  variant={showQuotationSummary ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowQuotationSummary(!showQuotationSummary)}
+                  className="text-xs"
+                >
+                  Quotation {showQuotationSummary ? "✓" : ""}
+                </Button>
+                <Button
+                  variant={showProformaSummary ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowProformaSummary(!showProformaSummary)}
+                  className="text-xs"
+                >
+                  Proforma {showProformaSummary ? "✓" : ""}
+                </Button>
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-md">
                 {moment(dateRange.startDate).format("DD MMM YYYY")} — {moment(dateRange.endDate).format("DD MMM YYYY")}
@@ -341,8 +382,26 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Summary Cards */}
-          <InvoiceSummaryCards dateRange={dateRange} selectedClientIds={selectedClientIds} />
+          {/* Invoice Summary Cards */}
+          {showInvoiceSummary && (
+            <div className="mb-4">
+              <InvoiceSummaryCards dateRange={dateRange} selectedClientIds={selectedClientIds} />
+            </div>
+          )}
+
+          {/* Quotation Summary Cards */}
+          {showQuotationSummary && (
+            <div className="mb-4">
+              <DocumentSummaryCards docType="quotation" dateRange={dateRange} selectedClientIds={selectedClientIds} />
+            </div>
+          )}
+
+          {/* Proforma Summary Cards */}
+          {showProformaSummary && (
+            <div className="mb-4">
+              <DocumentSummaryCards docType="proforma" dateRange={dateRange} selectedClientIds={selectedClientIds} />
+            </div>
+          )}
         </div>
 
         {/* Chart Selector Dropdown */}
@@ -413,6 +472,20 @@ const Dashboard = () => {
           <div className="mb-4">
             <h2 className="section-heading text-gray-900 mb-4">Recent Activity</h2>
             <RecentInvoices dateRange={dateRange} selectedClientIds={selectedClientIds} />
+          </div>
+        )}
+
+        {(selectedCharts.includes("quotationStatus") || selectedCharts.includes("proformaStatus")) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
+            {selectedCharts.includes("quotationStatus") && <DocumentStatusChart docType="quotation" dateRange={dateRange} selectedClientIds={selectedClientIds} />}
+            {selectedCharts.includes("proformaStatus") && <DocumentStatusChart docType="proforma" dateRange={dateRange} selectedClientIds={selectedClientIds} />}
+          </div>
+        )}
+
+        {(selectedCharts.includes("recentQuotations") || selectedCharts.includes("recentProformas")) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
+            {selectedCharts.includes("recentQuotations") && <RecentDocuments docType="quotation" dateRange={dateRange} selectedClientIds={selectedClientIds} />}
+            {selectedCharts.includes("recentProformas") && <RecentDocuments docType="proforma" dateRange={dateRange} selectedClientIds={selectedClientIds} />}
           </div>
         )}
       </div>

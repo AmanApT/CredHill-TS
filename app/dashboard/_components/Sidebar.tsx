@@ -13,6 +13,11 @@ import {
   ChevronRight,
   Settings,
   FileText,
+  SlidersHorizontal,
+  ScrollText,
+  Files,
+  FilePlus2,
+  FileStack,
 } from "lucide-react";
 import Image from "next/image";
 import { AnnouncementCard } from "@/app/_components/AnnouncementCard";
@@ -71,6 +76,31 @@ export function Sidebar() {
       ],
     },
     {
+      title: "Sales Documents",
+      items: [
+        {
+          icon: <ScrollText className="h-5 w-5" />,
+          label: "Create Quotation",
+          href: "/create_quotation",
+        },
+        {
+          icon: <Files className="h-5 w-5" />,
+          label: "View Quotations",
+          href: "/view_quotations",
+        },
+        {
+          icon: <FilePlus2 className="h-5 w-5" />,
+          label: "Create Proforma",
+          href: "/create_proforma",
+        },
+        {
+          icon: <FileStack className="h-5 w-5" />,
+          label: "View Proformas",
+          href: "/view_proformas",
+        },
+      ],
+    },
+    {
       title: "Settings",
       items: [
         {
@@ -78,11 +108,17 @@ export function Sidebar() {
           label: "Profile",
           href: "/profile",
         },
+        {
+          icon: <SlidersHorizontal className="h-5 w-5" />,
+          label: "Invoice Settings",
+          href: "/invoice_settings",
+        },
       ],
     },
   ];
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + "/");
 
   return (
     <div

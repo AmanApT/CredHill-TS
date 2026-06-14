@@ -6,11 +6,8 @@ import { Sun, CloudSun, Sunset, Moon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 function getGreeting(): { text: string; Icon: LucideIcon; color: string } {
-  // IST = UTC + 5:30
-  const now = new Date();
-  const istOffset = 5.5 * 60 * 60 * 1000;
-  const istTime = new Date(now.getTime() + istOffset - now.getTimezoneOffset() * 60 * 1000);
-  const hour = istTime.getUTCHours();
+  const istTime = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  const hour = istTime.getHours();
 
   if (hour >= 5 && hour < 12) return { text: "Good Morning", Icon: Sun, color: "text-amber-400" };
   if (hour >= 12 && hour < 17) return { text: "Good Afternoon", Icon: CloudSun, color: "text-orange-400" };

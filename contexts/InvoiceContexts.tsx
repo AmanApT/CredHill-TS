@@ -50,6 +50,7 @@ export interface InvoiceFormData {
   date: string;
   approvalId: string;
   invoiceStatus: boolean;
+  validUntil?: string; // quotations only — ignored by invoices
 }
 
 export interface AccountInfo {
@@ -74,8 +75,14 @@ export interface InvoiceContextType {
   setIncludeBankDetails: Dispatch<SetStateAction<boolean>>;
   invoices: any[];
   setInvoices: Dispatch<SetStateAction<any[]>>;
+  quotations: any[];
+  setQuotations: Dispatch<SetStateAction<any[]>>;
+  proformas: any[];
+  setProformas: Dispatch<SetStateAction<any[]>>;
   setItems: Dispatch<SetStateAction<any[]>>;
   items: any[];
+  extraFields: Record<string, string>;
+  setExtraFields: Dispatch<SetStateAction<Record<string, string>>>;
 }
 const InvoiceContext = createContext<InvoiceContextType | undefined>(undefined);
 
@@ -90,6 +97,8 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [invoices, setInvoices] = useState<any[]>([]);
+  const [quotations, setQuotations] = useState<any[]>([]);
+  const [proformas, setProformas] = useState<any[]>([]);
 
   const [companyDetails, setCompanyDetails] = useState<{
     billedBy: CompanyDetails;
@@ -150,6 +159,7 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
 
   const [includeBankDetails, setIncludeBankDetails] = useState<boolean>(false);
   const [items, setItems] = useState<any[]>([]);
+  const [extraFields, setExtraFields] = useState<Record<string, string>>({});
   return (
     <InvoiceContext.Provider
       value={{
@@ -163,8 +173,14 @@ export const InvoiceProvider = ({ children }: { children: ReactNode }) => {
         setIncludeBankDetails,
         invoices,
         setInvoices,
+        quotations,
+        setQuotations,
+        proformas,
+        setProformas,
         items,
-        setItems
+        setItems,
+        extraFields,
+        setExtraFields,
       }}
     >
       {children}
