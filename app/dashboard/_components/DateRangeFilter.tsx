@@ -60,6 +60,15 @@ export function DateRangeFilter({ selectedFilter, customStartDate, customEndDate
 
         <Button
             size="sm"
+          onClick={() => handleQuickFilter("monthToDate")}
+          variant={selectedFilter === "monthToDate" ? "default" : "outline"}
+          className={selectedFilter === "monthToDate" ? "bg-blue-600" : ""}
+        >
+          Month to Date
+        </Button>
+
+        <Button
+            size="sm"
           onClick={() => handleQuickFilter("all")}
           variant={selectedFilter === "all" ? "default" : "outline"}
           className={selectedFilter === "all" ? "bg-blue-600" : ""}

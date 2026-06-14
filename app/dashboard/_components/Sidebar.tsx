@@ -191,9 +191,8 @@ export function Sidebar() {
       <div className="pb-2">
         <AnnouncementCard
           collapsed={isCollapsed}
-          title="Invoice Theme Customizer & Client Wise Dashboard Filter"
-          description="Personalize your invoice colors and font size. Open any invoice preview and click the Theme button.
-          Also, now you can filter you dashboard and invoices data client wise
+          title="Introducing quotation and proforma invoices"
+          description="Create and manage quotations and proforma invoices with ease. Share professional estimates with clients before final invoicing, track approvals, and streamline your billing workflow.
           "
         />
       </div>

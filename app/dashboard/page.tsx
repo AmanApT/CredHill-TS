@@ -48,10 +48,10 @@ const ALL_CHARTS: ChartOption[] = [
 
 const Dashboard = () => {
   const pathname = usePathname();
-  const [selectedFilter, setSelectedFilter] = useState<FilterType>("month");
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>("monthToDate");
   const [customStartDate, setCustomStartDate] = useState<string>();
   const [customEndDate, setCustomEndDate] = useState<string>();
-  const [dateRange, setDateRange] = useState<DateRange>(getDateRange("month"));
+  const [dateRange, setDateRange] = useState<DateRange>(getDateRange("monthToDate"));
   const [showDateFilter, setShowDateFilter] = useState(false);
   const [selectedCharts, setSelectedCharts] = useState<ChartKey[]>(["timeline", "clientRevenue", "recentActivity"]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -59,8 +59,8 @@ const Dashboard = () => {
   const [selectedClientIds, setSelectedClientIds] = useState<string[]>([]);
   const [showClientFilter, setShowClientFilter] = useState(false);
   const [showInvoiceSummary, setShowInvoiceSummary] = useState(true);
-  const [showQuotationSummary, setShowQuotationSummary] = useState(true);
-  const [showProformaSummary, setShowProformaSummary] = useState(true);
+  const [showQuotationSummary, setShowQuotationSummary] = useState(false);
+  const [showProformaSummary, setShowProformaSummary] = useState(false);
 
   const toggleChart = (key: ChartKey) => {
     setSelectedCharts((prev) => {
@@ -235,7 +235,7 @@ const Dashboard = () => {
                   onClick={() => setShowInvoiceSummary(!showInvoiceSummary)}
                   className="text-xs"
                 >
-                  Invoice {showInvoiceSummary ? "✓" : ""}
+                  Invoice 
                 </Button>
                 <Button
                   variant={showQuotationSummary ? "default" : "outline"}
@@ -243,7 +243,7 @@ const Dashboard = () => {
                   onClick={() => setShowQuotationSummary(!showQuotationSummary)}
                   className="text-xs"
                 >
-                  Quotation {showQuotationSummary ? "✓" : ""}
+                  Quotation 
                 </Button>
                 <Button
                   variant={showProformaSummary ? "default" : "outline"}
@@ -251,7 +251,7 @@ const Dashboard = () => {
                   onClick={() => setShowProformaSummary(!showProformaSummary)}
                   className="text-xs"
                 >
-                  Proforma {showProformaSummary ? "✓" : ""}
+                  Proforma 
                 </Button>
               </div>
             </div>

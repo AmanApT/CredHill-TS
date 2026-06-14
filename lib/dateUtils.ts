@@ -7,7 +7,7 @@ export interface DateRange {
   endDate: Date;
 }
 
-export type FilterType = "week" | "month" | "all" | "custom";
+export type FilterType = "week" | "month" | "monthToDate" | "all" | "custom";
 
 /**
  * Get date range based on filter type
@@ -23,6 +23,9 @@ export function getDateRange(filterType: FilterType, customStart?: Date, customE
     case "month":
       startDate.setMonth(endDate.getMonth() - 1);
       break;
+    case "monthToDate":
+      startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+      break;
     case "custom":
       if (!customStart || !customEnd) {
         throw new Error("Custom date range requires both start and end dates");
@@ -35,7 +38,7 @@ export function getDateRange(filterType: FilterType, customStart?: Date, customE
       startDate = new Date("1970-01-01");
       break;
     default:
-      startDate.setMonth(endDate.getMonth() - 1);
+      startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
   }
 
   return { startDate, endDate };
@@ -76,6 +79,7 @@ export function getFilterDisplayText(filterType: FilterType): string {
   const textMap: Record<FilterType, string> = {
     week: "Past 1 Week",
     month: "Past 1 Month",
+    monthToDate: "Month to Date",
     all: "All Time",
     custom: "Custom Range",
   };
